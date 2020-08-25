@@ -23,7 +23,7 @@ export async function setup(ctx) {
     const ground = MeshBuilder.CreateGround('ground', { width: 100, height: 100 }, scene)
     ground.material = groundMat
     ground.checkCollisions = true
-    xrHelper.teleportation.addFloorMesh(ground)
+    if (xrHelper.teleportation) xrHelper.teleportation.addFloorMesh(ground)
 
     // Desk
     const shapeMat = new StandardMaterial('Material-Shape', scene)

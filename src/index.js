@@ -37,6 +37,7 @@ const init = async () => {
     context.xrHelper = xrHelper
 
     // Interactions
+    context.selectedMeshes = {}
     // POINTERDOWN
     scene.onPointerObservable.add((pointerInfo) => {
         const { pickedMesh, hit } = pointerInfo.pickInfo
@@ -44,7 +45,8 @@ const init = async () => {
         if (!pickedMesh) return
         if (!pickedMesh.startInteraction) return
         console.log('POINTER DOWN', pointerInfo)
-        if (xrHelper.baseExperience.state === WebXRState.IN_XR) { // XR Mode
+        context.selectedMeshes[pointerInfo.event.pointerId] = pickedMesh
+        if (xrHelper.baseExperience && xrHelper.baseExperience.state === WebXRState.IN_XR) { // XR Mode
             const xrInput = xrHelper.pointerSelection.getXRControllerByPointerId(pointerInfo.event.pointerId)
             if (!xrInput) return
             const motionController = xrInput.motionController
@@ -55,15 +57,25 @@ const init = async () => {
         }
     }, PointerEventTypes.POINTERDOWN)
 
+    // POINTERMOVE
+    scene.onPointerObservable.add((pointerInfo) => {
+        const pickedMesh = context.selectedMeshes[pointerInfo.event.pointerId]
+        if (pickedMesh && pickedMesh.moveInteraction) {
+            console.log('POINTER MOVE', pointerInfo)
+            pickedMesh.moveInteraction(pointerInfo)
+        }
+    }, PointerEventTypes.POINTERMOVE)
+
+
     // POINTERUP
     scene.onPointerObservable.add((pointerInfo) => {
-        const { pickedMesh, hit } = pointerInfo.pickInfo
-        if (!hit) return
-        if (!pickedMesh) return
-        if (!pickedMesh.endInteraction) return
-        console.log('POINTER UP')
-        if (pickedMesh.endInteraction) {
-            pickedMesh.endInteraction()
+        const pickedMesh = context.selectedMeshes[pointerInfo.event.pointerId]
+        if (pickedMesh) {
+            if (pickedMesh.endInteraction) {
+                console.log('POINTER END', pointerInfo)
+                pickedMesh.endInteraction()
+            }
+            delete context.selectedMeshes[pointerInfo.event.pointerId]
         }
     }, PointerEventTypes.POINTERUP)
 
