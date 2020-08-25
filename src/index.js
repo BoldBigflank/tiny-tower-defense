@@ -3,7 +3,7 @@ import { mapScene } from './utils/mapGenerator'
 import * as roomShip from './rooms/Ship.js'
 
 const {
-    Scene, Color3, Vector3, UniversalCamera, HemisphericLight, PointLight, StandardMaterial, MeshBuilder, PointerEventTypes
+    Scene, Color3, Vector3, UniversalCamera, HemisphericLight, PointLight, StandardMaterial, MeshBuilder, PointerEventTypes, WebXRState
 } = BABYLON
 
 const context = {}
@@ -37,45 +37,35 @@ const init = async () => {
     context.xrHelper = xrHelper
 
     // Interactions
+    // POINTERDOWN
     scene.onPointerObservable.add((pointerInfo) => {
-        const pickedMesh = pointerInfo.pickInfo.pickedMesh
+        const { pickedMesh, hit } = pointerInfo.pickInfo
+        if (!hit) return
         if (!pickedMesh) return
-        const xrInput = xrHelper.pointerSelection.getXRControllerByPointerId(pointerInfo.event.pointerId)
-        if (!xrInput) return
-        const motionController = xrInput.motionController
-        if (!motionController) return
-
-        switch (pointerInfo.type) {
-        case PointerEventTypes.POINTERDOWN:
-            console.log('POINTER DOWN', pointerInfo)
-            if (pickedMesh.startInteraction) {
-                pickedMesh.startInteraction(motionController.rootMesh)
-            }
-            break
-        case PointerEventTypes.POINTERUP:
-            console.log('POINTER UP')
-            if (pickedMesh.endInteraction) {
-                pickedMesh.endInteraction(motionController.rootMesh)
-            }
-            break
-        // case PointerEventTypes.POINTERMOVE:
-        //     console.log('POINTER MOVE')
-        //     break
-        // case PointerEventTypes.POINTERWHEEL:
-        //     console.log('POINTER WHEEL')
-        //     break
-        // case PointerEventTypes.POINTERPICK:
-        //     console.log('POINTER PICK')
-        //     break
-        // case PointerEventTypes.POINTERTAP:
-        //     console.log('POINTER TAP')
-        //     break
-        // case PointerEventTypes.POINTERDOUBLETAP:
-        //     console.log('POINTER DOUBLE-TAP')
-        //     break
-        default: break
+        if (!pickedMesh.startInteraction) return
+        console.log('POINTER DOWN', pointerInfo)
+        if (xrHelper.baseExperience.state === WebXRState.IN_XR) { // XR Mode
+            const xrInput = xrHelper.pointerSelection.getXRControllerByPointerId(pointerInfo.event.pointerId)
+            if (!xrInput) return
+            const motionController = xrInput.motionController
+            if (!motionController) return
+            pickedMesh.startInteraction(motionController.rootMesh)
+        } else { // Regular drag and drop
+            // Send the pointer ray I suppose?
         }
-    })
+    }, PointerEventTypes.POINTERDOWN)
+
+    // POINTERUP
+    scene.onPointerObservable.add((pointerInfo) => {
+        const { pickedMesh, hit } = pointerInfo.pickInfo
+        if (!hit) return
+        if (!pickedMesh) return
+        if (!pickedMesh.endInteraction) return
+        console.log('POINTER UP')
+        if (pickedMesh.endInteraction) {
+            pickedMesh.endInteraction()
+        }
+    }, PointerEventTypes.POINTERUP)
 
     // Load the Ship
     await roomShip.setup(context)

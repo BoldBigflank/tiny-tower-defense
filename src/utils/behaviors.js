@@ -3,7 +3,7 @@ export function addGrabbable(model) {
         startInteraction(controllerMesh) {
             this.setParent(controllerMesh)
         },
-        endInteraction(controllerMesh) {
+        endInteraction() {
             this.setParent(null)
         }
     })
