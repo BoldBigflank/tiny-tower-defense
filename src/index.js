@@ -24,7 +24,7 @@ const init = async () => {
     context.scene = scene
 
     // Add a camera to the scene and attach it to the canvas
-    const camera = new UniversalCamera('Camera', new Vector3(0, 2, -5), scene)
+    const camera = new UniversalCamera('Camera', new Vector3(0, 6.51, -2), scene)
     camera.attachControl(canvas, true)
     camera.speed = 0.1
     camera.angularSensibility = 9000

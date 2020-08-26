@@ -38,13 +38,14 @@ export async function setup(ctx) {
     addGrabbable(mesh)
     scene.addMaterial(mesh.material)
     scene.addMesh(mesh)
-    mesh.position = new Vector3(0, 5.5, 0)
+    mesh.position = new Vector3(0, 5, 0)
 
     const cabinWallsMesh = intersectDrawings(cabinWalls)
     scene.addMesh(cabinWallsMesh)
     cabinWallsMesh.setPivotPoint(new Vector3(0, -.5, 0))
     cabinWallsMesh.position = new Vector3(0, 5, 0)
     cabinWallsMesh.scaling = new Vector3(10, 10, 10)
+    cabinWallsMesh.checkCollisions = true
 
 
     // Cabin Floor
@@ -53,6 +54,7 @@ export async function setup(ctx) {
     cabinFloorMesh.setPivotPoint(new Vector3(0, -.5, 0))
     cabinFloorMesh.position = new Vector3(0, 4.9, -5)
     cabinFloorMesh.scaling = new Vector3(10, 10, .2)
+    cabinFloorMesh.checkCollisions = true
     if (xrHelper.teleportation) xrHelper.teleportation.addFloorMesh(cabinFloorMesh)
 
     // Cabin Roof/Quarterdeck floor
