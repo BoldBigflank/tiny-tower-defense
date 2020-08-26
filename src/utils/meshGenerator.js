@@ -1,12 +1,19 @@
 // import { Vector3, CSG, Mesh, MeshBuilder } from 'babylonjs'
 
-const { Vector3, Color3, MeshBuilder, Mesh, CSG } = BABYLON
+const { Vector3, Color3, MeshBuilder, Mesh, CSG, StandardMaterial } = BABYLON
 
 const GRID_TO_UNITS = 1 / 3
 
 const scaledVector3 = (x, y, z, scale) => {
     scale = scale || GRID_TO_UNITS
     return new Vector3(x * scale, y * scale, z * scale)
+}
+
+const createColorMaterial = (color) => {
+    // Desk
+    const colorMat = new StandardMaterial('Material-Shape')
+    colorMat.diffuseColor = color
+    return colorMat
 }
 
 // Input an array of polygons, an axis
@@ -46,15 +53,15 @@ const extrudePolygons = (polygons) => {
 
 // Input an array of drawings, a material
 // Return a Mesh made by intersecting the meshes made by extruding each drawing
-const intersectDrawings = (modelObject, shapeMat) => {
+const intersectDrawings = (modelObject) => {
     const { drawings, color } = modelObject
     const [r, g, b] = color.split(',')
-    shapeMat.diffuseColor = new Color3(r, g, b)
+    const colorMat = createColorMaterial(new Color3(r, g, b))
     const axes = ['x', 'y', 'z']
     const extrudeMeshes = []
     // Make a mesh from each of the shapes
     drawings.forEach((drawing, i) => {
-        if (!drawing.polygons.length) return // Don't extrude meshes
+        if (!drawing.polygons.length) return null // Don't extrude meshes
         if (drawing.mirror) {
             const mirrorPolygons = []
             drawing.polygons.forEach((polygon) => {
@@ -74,7 +81,7 @@ const intersectDrawings = (modelObject, shapeMat) => {
 
         extrudeMeshes.push(extrudeMesh)
     })
-    if (!extrudeMeshes.length) return
+    if (!extrudeMeshes.length) return null
     // Make CSG from each
     // Combine using intersect
     let resultCSG = null
@@ -86,7 +93,8 @@ const intersectDrawings = (modelObject, shapeMat) => {
         }
     })
 
-    const resultMesh = resultCSG.toMesh('Result-Mesh', shapeMat, null, true)
+    const resultMesh = resultCSG.toMesh('Result-Mesh', colorMat, null, true)
+
     extrudeMeshes.forEach((mesh) => mesh.dispose())
     return resultMesh
 }
