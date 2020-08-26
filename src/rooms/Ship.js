@@ -1,6 +1,6 @@
-import { intersectDrawings } from '../utils/meshGenerator'
+import { intersectDrawings, createColorMaterial } from '../utils/meshGenerator'
 import { addGrabbable } from '../utils/behaviors'
-import { desk } from '../content/models.js'
+import { cabinWalls, cabinFloor, desk } from '../content/models.js'
 import * as WavesStation from './Waves'
 
 const {
@@ -29,23 +29,36 @@ export async function setup(ctx) {
     const ground = MeshBuilder.CreateGround('ground', { width: 100, height: 100 }, scene)
     ground.material = groundMat
     ground.checkCollisions = true
-    if (xrHelper.teleportation) xrHelper.teleportation.addFloorMesh(ground)
+    ground.position.y = -0.1
+    // if (xrHelper.teleportation) xrHelper.teleportation.addFloorMesh(ground)
 
     // Desk
-    const shapeMat = new StandardMaterial('Material-Shape', scene)
-    shapeMat.diffuseColor = new Color3(0.8, 0.4, 0.3)
-
     const mesh = intersectDrawings(desk)
     mesh.name = 'Grabbable-Desk'
     addGrabbable(mesh)
     scene.addMaterial(mesh.material)
     scene.addMesh(mesh)
-    mesh.position = new Vector3(0, 0.5, 0)
+    mesh.position = new Vector3(0, 5.5, 0)
 
-    // Desk 2
-    const mesh2 = mesh.clone('Grabbable-Desk2')
-    mesh2.position.x = -3
-    addGrabbable(mesh2)
+    const cabinWallsMesh = intersectDrawings(cabinWalls)
+    scene.addMesh(cabinWallsMesh)
+    cabinWallsMesh.setPivotPoint(new Vector3(0, -.5, 0))
+    cabinWallsMesh.position = new Vector3(0, 5, 0)
+    cabinWallsMesh.scaling = new Vector3(10, 10, 10)
+
+
+    // Cabin Floor
+    const cabinFloorMesh = intersectDrawings(cabinFloor)
+    scene.addMesh(cabinFloorMesh)
+    cabinFloorMesh.setPivotPoint(new Vector3(0, -.5, 0))
+    cabinFloorMesh.position = new Vector3(0, 4.9, -5)
+    cabinFloorMesh.scaling = new Vector3(10, 10, .2)
+    if (xrHelper.teleportation) xrHelper.teleportation.addFloorMesh(cabinFloorMesh)
+
+    // Cabin Roof/Quarterdeck floor
+    const quarterdeckFloorMesh = cabinFloorMesh.clone('Quarterdeck-Floor')
+    quarterdeckFloorMesh.position.y += 2.5
+    if (xrHelper.teleportation) xrHelper.teleportation.addFloorMesh(quarterdeckFloorMesh)
 
     // Make waves
     await WavesStation.setup(ctx)
