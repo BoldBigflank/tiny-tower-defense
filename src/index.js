@@ -3,7 +3,7 @@ import { mapScene } from './utils/mapGenerator'
 import * as roomShip from './rooms/Ship.js'
 
 const {
-    Scene, Color3, Vector3, UniversalCamera, HemisphericLight, PointLight, StandardMaterial, MeshBuilder, PointerEventTypes, WebXRState
+    Scene, Color3, Vector3, UniversalCamera, DynamicTexture, StandardMaterial, MeshBuilder, PointerEventTypes, WebXRState
 } = BABYLON
 
 const context = {}
@@ -18,13 +18,44 @@ const init = async () => {
     // const scene = await mapScene(engine, canvas)
     // Create the scene space
     const scene = new Scene(engine)
-    scene.ambientColor = new Color3(0.96, 0.84, 0.1)
+    const waterColor = new Color3(0.004, 0.608, 0.991)
+    const skyColor = new Color3(0.01, 0.824, 1)
+    scene.ambientColor = skyColor
+    scene.clearColor = new Color3(0.01, 0.824, 1)
     scene.gravity = new Vector3(0, -9.81, 0)
     scene.collisionsEnabled = true
     context.scene = scene
 
+    // // Sky
+    // // Sky
+    // var stars = Mesh.CreateSphere('stars', 100, 1000, scene)
+    // stars.material = materialSky
+
+    // Skybox
+    const skybox = MeshBuilder.CreateSphere('skyBox', { diameter: 1000, segments: 100 }, scene)
+    // const skybox = MeshBuilder.CreateBox("skyBox", { size: 100 }, scene)
+    const skyboxMaterial = new StandardMaterial('skyBox', scene)
+    skyboxMaterial.backFaceCulling = false
+    skyboxMaterial.disableLighting = true
+    skybox.infiniteDistance = true
+
+    const textureSky = new DynamicTexture('SkyTexture', { width: 512, height: 512 }, scene)
+    const ctx = textureSky.getContext()
+    skyboxMaterial.reflectionTexture = textureSky
+    const grd = ctx.createLinearGradient(0, 0, 0, 512)
+    // grd.addColorStop(0, 'red')
+    // grd.addColorStop(1, 'green')
+    // grd.addColorStop(0, waterColor.toHexString()) // light #d1b7ce dark #1e2237
+    // grd.addColorStop(0.65, waterColor.toHexString())
+    // grd.addColorStop(0.75, skyColor.toHexString())
+    grd.addColorStop(1, skyColor.toHexString())
+    ctx.fillStyle = grd
+    ctx.fillRect(0, 0, 512, 512)
+    textureSky.update()
+    skybox.material = skyboxMaterial
+
     // Add a camera to the scene and attach it to the canvas
-    const camera = new UniversalCamera('Camera', new Vector3(0, 6.51, -2), scene)
+    const camera = new UniversalCamera('Camera', new Vector3(0, 4.56, -2), scene)
     camera.attachControl(canvas, true)
     camera.speed = 0.1
     camera.angularSensibility = 9000
@@ -65,7 +96,6 @@ const init = async () => {
             pickedMesh.moveInteraction(pointerInfo)
         }
     }, PointerEventTypes.POINTERMOVE)
-
 
     // POINTERUP
     scene.onPointerObservable.add((pointerInfo) => {

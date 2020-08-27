@@ -99,4 +99,4 @@ const intersectDrawings = (modelObject) => {
     return resultMesh
 }
 
-export { intersectDrawings }
+export { intersectDrawings, createColorMaterial }
