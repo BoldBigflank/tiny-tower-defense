@@ -8,8 +8,9 @@ const {
 const DegreesToRadians = (degrees) => degrees / 57.2958
 
 const startNewWave = function () {
-    this.position = new Vector3(Math.random() * 50 - 25, 0, Math.random() * 75 - 50)
-    // console.log('position', this.position.x, this.position.y, this.position.z)
+    const r = 50 * Math.random() + 10
+    const a = Math.random() * 2 * Math.PI
+    this.position = new Vector3(r * Math.cos(a), 0, r * Math.sin(a))
     this.getScene().beginAnimation(
         this,
         0,
@@ -21,7 +22,7 @@ const startNewWave = function () {
 }
 
 export async function setup(ctx) {
-    const { scene } = ctx
+    const { scene, engine } = ctx
     const waveMesh = intersectDrawings(wave)
     waveMesh.setPivotPoint(new Vector3(0.5, 0, 0.5))
     waveMesh.billboardMode = Mesh.BILLBOARDMODE_Y
@@ -50,17 +51,15 @@ export async function setup(ctx) {
     for (let i = 0; i < 24; i++) {
         // Transform
         const waveMeshClone = waveMesh.clone(`WaveMesh-${i}`)
-        waveMeshClone.scaling = new Vector3(Math.random() * 1.5 + 0.75, Math.random() * 1 + 0.5, 1)
-        waveMeshClone.position = new Vector3(Math.random() * 50 - 25, 0, Math.random() * 50 - 25)
         waveMeshClone.parent = ctx.ocean
 
         startNewWave.bind(waveMeshClone)()
         scene.registerAfterRender(() => {
-            waveMeshClone.position.z += ctx.sailing.speed / 60
-            waveMeshClone.rotateAround(ctx.sailing.position, Vector3.Up(), DegreesToRadians(ctx.sailing.rotation) / 60)
-            // if (Math.random() * 60 > 59) {
-            //     console.log('position', ctx.sailing.position)
-            // }
+            const dt = engine.getDeltaTime() / 1000
+            // New Position
+            waveMeshClone.position.z += ctx.sailing.speed * dt
+            // Turning rotation
+            waveMeshClone.rotateAround(ctx.sailing.position, Vector3.Up(), DegreesToRadians(ctx.sailing.rotation) * dt)
         })
     }
     waveMesh.dispose()

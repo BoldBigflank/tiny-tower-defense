@@ -11,6 +11,7 @@ const context = {}
 const init = async () => {
     const canvas = document.getElementById('renderCanvas')
     const engine = new BABYLON.Engine(canvas, true)
+    context.engine = engine
     // createScene function that creates and return the scene
 
     // call the createScene function

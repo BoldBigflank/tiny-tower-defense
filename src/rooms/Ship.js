@@ -2,6 +2,8 @@ import { intersectDrawings, createColorMaterial } from '../utils/meshGenerator'
 import { addGrabbable } from '../utils/behaviors'
 import { shipBack, shipDeck, shipFront, desk } from '../content/models.js'
 import * as WavesStation from './Waves'
+import * as IslandsStation from './Islands'
+
 
 const {
     Color3, Vector3, HemisphericLight, PointLight, StandardMaterial, MeshBuilder, TransformNode
@@ -25,7 +27,7 @@ export async function setup(ctx) {
     oceanMat.specularColor = oceanColor
     // oceanMat.emissiveColor = new Color3(0.004, 0.608, 0.991)
 
-    const ocean = MeshBuilder.CreateGround('ocean', { width: 100, height: 100 }, scene)
+    const ocean = MeshBuilder.CreateGround('ocean', { width: 1000, height: 1000 }, scene)
     ctx.ocean = ocean
     ocean.material = oceanMat
     ocean.checkCollisions = true
@@ -107,10 +109,7 @@ export async function setup(ctx) {
         position: shipMesh.position
     }
     await WavesStation.setup(ctx)
-
-    // scene.registerAfterRender(function() {
-    //     shipMesh.rotate(Vector3.Up(), Math.PI * 1 / 60 / 6)
-    // }.bind(this))
+    await IslandsStation.setup(ctx)
 }
 
 export function enter(ctx) {
