@@ -2,11 +2,14 @@ import { intersectDrawings } from '../utils/meshGenerator'
 import { wave } from '../content/models.js'
 
 const {
-    Animation, Color3, Vector3, Mesh
+    Animation, Color3, Vector3, Mesh, Space
 } = BABYLON
 
+const DegreesToRadians = (degrees) => degrees / 57.2958
+
 const startNewWave = function () {
-    this.position = new Vector3(Math.random() * 50 - 25, 0, Math.random() * 50 - 25)
+    this.position = new Vector3(Math.random() * 50 - 25, 0, Math.random() * 75 - 50)
+    // console.log('position', this.position.x, this.position.y, this.position.z)
     this.getScene().beginAnimation(
         this,
         0,
@@ -49,8 +52,16 @@ export async function setup(ctx) {
         const waveMeshClone = waveMesh.clone(`WaveMesh-${i}`)
         waveMeshClone.scaling = new Vector3(Math.random() * 1.5 + 0.75, Math.random() * 1 + 0.5, 1)
         waveMeshClone.position = new Vector3(Math.random() * 50 - 25, 0, Math.random() * 50 - 25)
+        waveMeshClone.parent = ctx.ocean
 
         startNewWave.bind(waveMeshClone)()
+        scene.registerAfterRender(() => {
+            waveMeshClone.position.z += ctx.sailing.speed / 60
+            waveMeshClone.rotateAround(ctx.sailing.position, Vector3.Up(), DegreesToRadians(ctx.sailing.rotation) / 60)
+            // if (Math.random() * 60 > 59) {
+            //     console.log('position', ctx.sailing.position)
+            // }
+        })
     }
     waveMesh.dispose()
 }

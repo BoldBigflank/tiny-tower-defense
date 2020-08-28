@@ -26,43 +26,26 @@ export async function setup(ctx) {
     // oceanMat.emissiveColor = new Color3(0.004, 0.608, 0.991)
 
     const ocean = MeshBuilder.CreateGround('ocean', { width: 100, height: 100 }, scene)
+    ctx.ocean = ocean
     ocean.material = oceanMat
     ocean.checkCollisions = true
     ocean.position.y = -0.1
     if (xrHelper.teleportation) xrHelper.teleportation.addFloorMesh(ocean)
 
-    // Desk
-    const mesh = intersectDrawings(desk)
-    mesh.name = 'Grabbable-Desk'
-    addGrabbable(mesh)
-    scene.addMaterial(mesh.material)
-    scene.addMesh(mesh)
-    mesh.position = new Vector3(0, 5, 0)
+    // // Desk
+    // const mesh = intersectDrawings(desk)
+    // mesh.name = 'Grabbable-Desk'
+    // addGrabbable(mesh)
+    // scene.addMaterial(mesh.material)
+    // scene.addMesh(mesh)
+    // mesh.position = new Vector3(0, 5, 0)
 
-    // const cabinWallsMesh = intersectDrawings(cabinWalls)
-    // scene.addMesh(cabinWallsMesh)
-    // cabinWallsMesh.setPivotPoint(new Vector3(0, -.5, 0))
-    // cabinWallsMesh.position = new Vector3(0, 5, 0)
-    // cabinWallsMesh.scaling = new Vector3(10, 10, 10)
-    // cabinWallsMesh.checkCollisions = true
-
-    // // Cabin Floor
-    // const cabinFloorMesh = intersectDrawings(cabinFloor)
-    // scene.addMesh(cabinFloorMesh)
-    // cabinFloorMesh.setPivotPoint(new Vector3(0, -.5, 0))
-    // cabinFloorMesh.position = new Vector3(0, 4.9, -5)
-    // cabinFloorMesh.scaling = new Vector3(10, 10, .2)
-    // cabinFloorMesh.checkCollisions = true
-    // if (xrHelper.teleportation) xrHelper.teleportation.addFloorMesh(cabinFloorMesh)
-
-    // // Cabin Roof/Quarterdeck floor
-    // const quarterdeckFloorMesh = cabinFloorMesh.clone('Quarterdeck-Floor')
-    // quarterdeckFloorMesh.position.y += 2.5
-    // if (xrHelper.teleportation) xrHelper.teleportation.addFloorMesh(quarterdeckFloorMesh)
-
+    const shipFloorColor = new Color3(0.54, 0.39, 0.33)
+    const shipMat = createColorMaterial(shipFloorColor)
 
     const shipBackMesh = intersectDrawings(shipBack)
     shipBackMesh.position.z = 2
+    shipBackMesh.checkCollisions = true
     const shipDeckMesh = intersectDrawings(shipDeck)
     shipDeckMesh.position.z = 1
     const shipDeckMesh2 = shipDeckMesh.clone()
@@ -70,13 +53,22 @@ export async function setup(ctx) {
     const shipFrontMesh = intersectDrawings(shipFront)
     shipFrontMesh.position.z = -1
 
+    // Mast
+    const shipMast = MeshBuilder.CreateCylinder('Mast1', {
+        height: 33 / 5,
+        diameter: 0.5 / 5
+    })
+    shipMast.position.z = 1
+    shipMast.material = shipMat
+
+    const shipMast2 = shipMast.clone('Mast2')
+    shipMast2.position.z = -1
+
     // Ship floors
-    const shipFloorColor = new Color3(0.54, 0.39, 0.33)
-    const shipFloorMat = createColorMaterial(shipFloorColor)
     // const floor1 = MeshBuilder.CreateGround('Floor', {}, scene)
     const floor1 = MeshBuilder.CreateBox('Floor1', { height: 1 / 24 })
     floor1.checkCollisions = true
-    floor1.material = shipFloorMat
+    floor1.material = shipMat
     floor1.scaling = new Vector3(0.99, 0.99, 4)
     floor1.position = new Vector3(0, -0.51, 0.5)
     floor1.overrideMaterialSideOrientation = BABYLON.Mesh.DOUBLESIDE
@@ -92,21 +84,33 @@ export async function setup(ctx) {
     if (xrHelper.teleportation) xrHelper.teleportation.addFloorMesh(floor3)
 
 
-    const shipMesh = new TransformNode('Ship')
+    const shipMesh = new TransformNode('Ship', scene)
     shipBackMesh.parent = shipMesh
     shipDeckMesh.parent = shipMesh
     shipDeckMesh2.parent = shipMesh
     shipFrontMesh.parent = shipMesh
+    shipMast.parent = shipMesh
+    shipMast2.parent = shipMesh
     floor1.parent = shipMesh
     floor2.parent = shipMesh
     floor3.parent = shipMesh
 
     shipMesh.position.y = 2.5
+    // This makes it 5 units high, or 2.5 units per floor.
     shipMesh.scaling = new Vector3(5, 5, 5)
     // cabinFloorMesh.parent = shipMesh
-    
+
     // Make waves
+    ctx.sailing = {
+        speed: 7,
+        rotation: 10, // The rotation value of the ship's helm
+        position: shipMesh.position
+    }
     await WavesStation.setup(ctx)
+
+    // scene.registerAfterRender(function() {
+    //     shipMesh.rotate(Vector3.Up(), Math.PI * 1 / 60 / 6)
+    // }.bind(this))
 }
 
 export function enter(ctx) {
