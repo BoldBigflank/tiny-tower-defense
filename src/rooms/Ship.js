@@ -1,19 +1,20 @@
 import { intersectDrawings, createColorMaterial } from '../utils/meshGenerator'
-import { addGrabbable } from '../utils/behaviors'
+import { addGrabbable, addAnchorControl, addSpinnable } from '../utils/behaviors'
 import { shipBack, shipDeck, shipFront, desk } from '../content/models.js'
 import * as WavesStation from './Waves'
 import * as IslandsStation from './Islands'
 
-
 const {
-    Color3, Vector3, HemisphericLight, PointLight, StandardMaterial, MeshBuilder, TransformNode
+    Color3, Vector3, HemisphericLight, PointLight, StandardMaterial, MeshBuilder, TransformNode, WebXRState
 } = BABYLON
+
+const DegreesToRadians = (degrees) => degrees / 57.2958
 
 export async function setup(ctx) {
     // ctx is an object with the other rooms, assets,
     // I need access to textures
     // materials
-    const { scene, xrHelper } = ctx
+    const { scene, engine, xrHelper, xrDefault } = ctx
     // Add lights to the scene
     const light1 = new HemisphericLight('light1', new Vector3(1, 1, 0), scene)
     // light1.diffuse = new Color3(1, 1, 0.85)
@@ -32,7 +33,7 @@ export async function setup(ctx) {
     ocean.material = oceanMat
     ocean.checkCollisions = true
     ocean.position.y = -0.1
-    if (xrHelper.teleportation) xrHelper.teleportation.addFloorMesh(ocean)
+    if (xrDefault.teleportation) xrDefault.teleportation.addFloorMesh(ocean)
 
     // // Desk
     // const mesh = intersectDrawings(desk)
@@ -66,6 +67,18 @@ export async function setup(ctx) {
     const shipMast2 = shipMast.clone('Mast2')
     shipMast2.position.z = -1
 
+    // Controls
+    const anchorBox = MeshBuilder.CreateBox('Anchor-Control', {size: 0.1}, scene)
+    addAnchorControl(anchorBox)
+    anchorBox.position = new Vector3(0.25, 0.6, 2)
+
+    const helmBox = MeshBuilder.CreateBox('Helm-Control', { height: 0.2, width: 0.2, depth: 0.025 }, scene)
+    addSpinnable(helmBox)
+
+    // helmBox.position = new Vector3(0, -0.2, 1.8)
+    helmBox.position = new Vector3(0, 0.7, 1.8)
+
+
     // Ship floors
     // const floor1 = MeshBuilder.CreateGround('Floor', {}, scene)
     const floor1 = MeshBuilder.CreateBox('Floor1', { height: 1 / 24 })
@@ -74,16 +87,16 @@ export async function setup(ctx) {
     floor1.scaling = new Vector3(0.99, 0.99, 4)
     floor1.position = new Vector3(0, -0.51, 0.5)
     floor1.overrideMaterialSideOrientation = BABYLON.Mesh.DOUBLESIDE
-    if (xrHelper.teleportation) xrHelper.teleportation.addFloorMesh(floor1)
+    if (xrDefault.teleportation) xrDefault.teleportation.addFloorMesh(floor1)
 
     const floor2 = floor1.clone('Floor2')
     floor2.position.y += 0.5
-    if (xrHelper.teleportation) xrHelper.teleportation.addFloorMesh(floor2)
+    if (xrDefault.teleportation) xrDefault.teleportation.addFloorMesh(floor2)
 
     const floor3 = floor2.clone('Floor3')
     floor3.position = new Vector3(0, 0.5, 2)
     floor3.scaling = new Vector3 (0.99, 0.99, 0.99)
-    if (xrHelper.teleportation) xrHelper.teleportation.addFloorMesh(floor3)
+    if (xrDefault.teleportation) xrDefault.teleportation.addFloorMesh(floor3)
 
 
     const shipMesh = new TransformNode('Ship', scene)
@@ -91,6 +104,8 @@ export async function setup(ctx) {
     shipDeckMesh.parent = shipMesh
     shipDeckMesh2.parent = shipMesh
     shipFrontMesh.parent = shipMesh
+    anchorBox.parent = shipMesh
+    helmBox.parent = shipMesh
     shipMast.parent = shipMesh
     shipMast2.parent = shipMesh
     floor1.parent = shipMesh
@@ -105,11 +120,18 @@ export async function setup(ctx) {
     // Make waves
     ctx.sailing = {
         speed: 7,
-        rotation: 10, // The rotation value of the ship's helm
+        rotation: 0, // The rotation value of the ship's helm
         position: shipMesh.position
     }
     await WavesStation.setup(ctx)
     await IslandsStation.setup(ctx)
+    // Only move when you're at the helm
+    scene.registerAfterRender(() => {
+        if (scene.activeCamera.position.y < 4) {
+            ctx.sailing.speed = 0
+            ctx.sailing.rotation = 0
+        }
+    })
 }
 
 export function enter(ctx) {

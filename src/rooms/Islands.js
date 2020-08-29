@@ -6,7 +6,7 @@ const {
 const DegreesToRadians = (degrees) => degrees / 57.2958
 
 export async function setup(ctx) {
-    const { scene, engine, xrHelper } = ctx
+    const { scene, engine, xrDefault } = ctx
     const islandMesh = MeshBuilder.CreateCylinder('Island', {diameterTop: 0, diameterBottom: 1}, scene)
 
     for (let i = 0; i < 24; i++) {
@@ -20,13 +20,14 @@ export async function setup(ctx) {
         islandMeshClone.parent = ctx.ocean
         islandMeshClone.material = colorNME()
 
+        // Move/rotate the islands to give the illusion of ship movement
         scene.registerAfterRender(() => {
             const dt = engine.getDeltaTime() / 1000
             // Position
             islandMeshClone.position.z += ctx.sailing.speed * dt
             // Turning rotation
             islandMeshClone.rotateAround(ctx.sailing.position, Vector3.Up(), DegreesToRadians(ctx.sailing.rotation) * dt)
-            if (xrHelper.telepoartation) xrHelper.teleportation.addFloorMesh(islandMeshClone)
+            if (xrDefault.teleportation) xrDefault.teleportation.addFloorMesh(islandMeshClone)
         })
     }
     islandMesh.dispose()

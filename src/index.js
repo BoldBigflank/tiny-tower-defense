@@ -56,7 +56,8 @@ const init = async () => {
     skybox.material = skyboxMaterial
 
     // Add a camera to the scene and attach it to the canvas
-    const camera = new UniversalCamera('Camera', new Vector3(0, 4.56, -2), scene)
+    const camera = new UniversalCamera('Camera', new Vector3(0, 7.11, 10.81), scene)
+    camera.rotation = new Vector3(0, Math.PI, 0)
     camera.attachControl(canvas, true)
     camera.speed = 0.1
     camera.angularSensibility = 9000
@@ -65,8 +66,16 @@ const init = async () => {
     camera.checkCollisions = true
 
     // XR start
-    const xrHelper = await scene.createDefaultXRExperienceAsync() // WebXRDefaultExperience
+    const xrDefault = await scene.createDefaultXRExperienceAsync() // WebXRDefaultExperience
+    context.xrDefault = xrDefault
+    const xrHelper = xrDefault.baseExperience
+    xrHelper.camera.setTransformationFromNonVRCamera(camera)
     context.xrHelper = xrHelper
+    xrHelper.onStateChangedObservable.add((state) => {
+        if (state === WebXRState.IN_XR) {
+            xrHelper.camera.ellipsoid = new Vector3(1,1,1)
+        }
+    })
 
     // Interactions
     context.selectedMeshes = {}
@@ -76,16 +85,17 @@ const init = async () => {
         if (!hit) return
         if (!pickedMesh) return
         if (!pickedMesh.startInteraction) return
-        console.log('POINTER DOWN', pointerInfo)
+        // console.log('POINTER DOWN', pointerInfo)
         context.selectedMeshes[pointerInfo.event.pointerId] = pickedMesh
-        if (xrHelper.baseExperience && xrHelper.baseExperience.state === WebXRState.IN_XR) { // XR Mode
-            const xrInput = xrHelper.pointerSelection.getXRControllerByPointerId(pointerInfo.event.pointerId)
+        if (xrHelper && xrHelper.state === WebXRState.IN_XR) { // XR Mode
+            const xrInput = xrDefault.pointerSelection.getXRControllerByPointerId(pointerInfo.event.pointerId)
             if (!xrInput) return
             const motionController = xrInput.motionController
             if (!motionController) return
-            pickedMesh.startInteraction(motionController.rootMesh)
+            pickedMesh.startInteraction(pointerInfo, motionController.rootMesh, context)
         } else { // Regular drag and drop
             // Send the pointer ray I suppose?
+            pickedMesh.startInteraction(pointerInfo, scene.activeCamera, context)
         }
     }, PointerEventTypes.POINTERDOWN)
 
@@ -93,8 +103,8 @@ const init = async () => {
     scene.onPointerObservable.add((pointerInfo) => {
         const pickedMesh = context.selectedMeshes[pointerInfo.event.pointerId]
         if (pickedMesh && pickedMesh.moveInteraction) {
-            console.log('POINTER MOVE', pointerInfo)
-            pickedMesh.moveInteraction(pointerInfo)
+            // console.log('POINTER MOVE', pointerInfo)
+            pickedMesh.moveInteraction(pointerInfo, pickedMesh, context)
         }
     }, PointerEventTypes.POINTERMOVE)
 
@@ -103,8 +113,8 @@ const init = async () => {
         const pickedMesh = context.selectedMeshes[pointerInfo.event.pointerId]
         if (pickedMesh) {
             if (pickedMesh.endInteraction) {
-                console.log('POINTER END', pointerInfo)
-                pickedMesh.endInteraction()
+                // console.log('POINTER END', pointerInfo, context)
+                pickedMesh.endInteraction(pointerInfo, context)
             }
             delete context.selectedMeshes[pointerInfo.event.pointerId]
         }
@@ -116,6 +126,14 @@ const init = async () => {
     engine.hideLoadingUI()
 
     scene.debugLayer.show()
+
+    scene.registerAfterRender(() => {
+        // TODO: If the active camera is under 4, stop the ship
+        // ctx.sailing
+        // scene.activeCameras.forEach((activeCamera) => {
+        //     console.log('STOP', scene.activeCamera)
+        // })
+    })
 
     // run the render loop
     engine.runRenderLoop(() => {

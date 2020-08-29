@@ -54,6 +54,7 @@ export async function setup(ctx) {
         waveMeshClone.parent = ctx.ocean
 
         startNewWave.bind(waveMeshClone)()
+        // Move/rotate the wave to give the illusion of movement
         scene.registerAfterRender(() => {
             const dt = engine.getDeltaTime() / 1000
             // New Position
