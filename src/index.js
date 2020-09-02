@@ -59,7 +59,7 @@ const init = async () => {
     const camera = new UniversalCamera('Camera', new Vector3(0, 7.11, 10.81), scene)
     camera.rotation = new Vector3(0, Math.PI, 0)
     camera.attachControl(canvas, true)
-    camera.speed = 0.1
+    camera.speed = 1.0
     camera.angularSensibility = 9000
     camera.applyGravity = true
     camera.ellipsoid = new Vector3(1, 1, 1)

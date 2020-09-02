@@ -32,7 +32,7 @@ export async function setup(ctx) {
     ctx.ocean = ocean
     ocean.material = oceanMat
     ocean.checkCollisions = true
-    ocean.position.y = -0.1
+    ocean.position.y = 0.1
     if (xrDefault.teleportation) xrDefault.teleportation.addFloorMesh(ocean)
 
     // // Desk
