@@ -18,9 +18,9 @@ export function addGrabbable(model) {
 export function addSPSEvents(model) {
     Object.assign(model, {
         getPickedParticle(pointerInfo) {
-            // console.log('getPickedParticle', pointerInfo.pickInfo)
             const sps = this.metadata.sps
             const pickedParticle = sps.pickedParticle(pointerInfo.pickInfo)
+            if (!pickedParticle) return null
             const { idx } = pickedParticle
             const particleMesh = sps.particles[idx]
             return particleMesh
@@ -37,10 +37,10 @@ export function addSPSEvents(model) {
             }
         },
         moveInteraction(pointerInfo, context) {
-            // console.log('moveInteraction', pointerInfo)
             // pickedMesh is this
-            const particleMesh = this.metadata.selectedParticles[pointerInfo.event.pointerId]
-            // const particleMesh = this.getPickedParticle(pointerInfo)
+            // const particleMesh = this.metadata.selectedParticles[pointerInfo.event.pointerId]
+            const particleMesh = this.getPickedParticle(pointerInfo)
+            if (!particleMesh) return
             const sps = this.metadata.sps
             if (particleMesh.moveInteraction) {
                 particleMesh.moveInteraction(pointerInfo, context)
@@ -67,7 +67,7 @@ export function addErasable(model) {
             this.scaling = (this.props.on) ? BABYLON.Vector3.One() : BABYLON.Vector3.Zero()
         },
         moveInteraction(pointerInfo, context) {
-            // console.log('moveInteraction')
+            this.scaling = BABYLON.Vector3.Zero()
         },
         endInteraction(pointerInfo, context) {
             // this.setParent(this.props.oldParent)
@@ -102,7 +102,6 @@ export function addAnchorControl(model, options) {
     Object.assign(model, {
         startInteraction(pointerInfo, controllerMesh, ctx) {
             ctx.sailing.speed = (ctx.sailing.speed === 0) ? 12 : 0
-            // console.log('setting speed', ctx.sailing.speed)
         }
     })
 }
