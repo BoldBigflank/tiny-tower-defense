@@ -1,9 +1,8 @@
 import './style.scss'
-import { mapScene } from './utils/mapGenerator'
-import * as roomShip from './rooms/Ship.js'
+import * as roomMuseum from './rooms/Museum.js'
 
 const {
-    Scene, Color3, Vector3, UniversalCamera, DynamicTexture, StandardMaterial, MeshBuilder, PointerEventTypes, WebXRState
+    Scene, Color3, Vector3, UniversalCamera, DynamicTexture, StandardMaterial, MeshBuilder, PointerEventTypes, WebXRState, CSG
 } = BABYLON
 
 const context = {}
@@ -56,18 +55,61 @@ const init = async () => {
     skybox.material = skyboxMaterial
 
     // Add a camera to the scene and attach it to the canvas
-    const camera = new UniversalCamera('Camera', new Vector3(0, 7.11, 10.81), scene)
+    const camera = new UniversalCamera('Camera', new Vector3(0, 2.01, 1), scene)
     camera.rotation = new Vector3(0, Math.PI, 0)
     camera.attachControl(canvas, true)
-    camera.speed = 1.0
+    camera.speed = 0.1
     camera.angularSensibility = 9000
     camera.applyGravity = true
     camera.ellipsoid = new Vector3(1, 1, 1)
     camera.checkCollisions = true
 
+    let blockMesh = MeshBuilder.CreateBox('Box', { size: 0.4 }, scene)
+    blockMesh.position = new Vector3(0, 1.2, 0)
+    const blockCSG = CSG.FromMesh(blockMesh)
+
     // XR start
     const xrDefault = await scene.createDefaultXRExperienceAsync() // WebXRDefaultExperience
+    xrDefault.input.onControllerAddedObservable.add((xrInput) => {
+        const box = MeshBuilder.CreateBox('gripBox', { size: 0.05, depth: 0.5 }, scene)
+        xrInput.onMotionControllerInitObservable.add((motionController) => {
+            // Watch for trigger events
+            console.log(motionController.getComponentIds())
+            const mainComponent = motionController.getMainComponent()
+            console.log(mainComponent)
+            if (mainComponent.isButton()) {
+                console.log('its a button')
+                mainComponent.onButtonStateChangedObservable.add((component) => {
+                    console.log('button pressed', component.value)
+                    if (component.value !== 1) {
+                        // Do a trigger event
+                        box.scaling = Vector3.Zero()
+                    } else {
+                        box.scaling = Vector3.One()
+                        // CSG the box
+                        const boxCSG = CSG.FromMesh(box)
+                        blockCSG.subtractInPlace(boxCSG)
+                        let newBlock = blockCSG.toMesh(blockMesh.name, blockMesh.material, scene)
+                        blockMesh.dispose()
+                        blockMesh = newBlock
+
+                    }
+                })
+            } else if (mainComponent.isAxes()) {
+                console.log('its an axes')
+                mainComponent.onAxisValueChangedObservable.add((values) => {
+                    console.log('axis changed', values.x, values.y)
+                })
+            }
+            motionController.onModelLoadedObservable.add((model) => {
+                box.position = new Vector3(0, 0, 0.27)
+                box.parent = xrInput.grip
+            })
+        })
+    })
     context.xrDefault = xrDefault
+    // xrDefault.teleportation.snapPointsOnly = true
+
     const xrHelper = xrDefault.baseExperience
     xrHelper.camera.setTransformationFromNonVRCamera(camera)
     context.xrHelper = xrHelper
@@ -76,6 +118,17 @@ const init = async () => {
             xrHelper.camera.ellipsoid = new Vector3(1,1,1)
         }
     })
+
+    xrHelper.onInitialXRPoseSetObservable.add((xrCamera) => {
+        console.log('xrHelper onInitialXRPoseSetObservable')
+        // xrCamera.onBeforeCameraTeleport as well
+        xrCamera.onAfterCameraTeleport.add((pos) => {
+            // This is the new position
+            console.log('got a new position')
+        })
+        if (xrCamera.onAfterCameraTeleport) { // JS13kGames lib doesn't have this?
+        }
+    });
 
     // Interactions
     context.selectedMeshes = {}
@@ -121,19 +174,11 @@ const init = async () => {
     }, PointerEventTypes.POINTERUP)
 
     // Load the Ship
-    await roomShip.setup(context)
+    await roomMuseum.setup(context)
 
     engine.hideLoadingUI()
 
     scene.debugLayer.show()
-
-    scene.registerAfterRender(() => {
-        // TODO: If the active camera is under 4, stop the ship
-        // ctx.sailing
-        // scene.activeCameras.forEach((activeCamera) => {
-        //     console.log('STOP', scene.activeCamera)
-        // })
-    })
 
     // run the render loop
     engine.runRenderLoop(() => {
