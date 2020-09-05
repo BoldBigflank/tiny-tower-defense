@@ -1,13 +1,76 @@
 export function addGrabbable(model) {
     Object.assign(model, {
         startInteraction(pointerInfo, controllerMesh, context) {
+            this.props = this.props || {}
+            this.props.oldParent = this.parent || null
             this.setParent(controllerMesh)
         },
         moveInteraction(pointerInfo, context) {
-            console.log('moveInteraction')
+            // console.log('moveInteraction')
         },
         endInteraction() {
-            this.setParent(null)
+            this.setParent(this.props.oldParent)
+        }
+    })
+}
+
+// Make individual events for a SolidParticleSystem Particle
+export function addSPSEvents(model) {
+    Object.assign(model, {
+        getPickedParticle(pointerInfo) {
+            // console.log('getPickedParticle', pointerInfo.pickInfo)
+            const sps = this.metadata.sps
+            const pickedParticle = sps.pickedParticle(pointerInfo.pickInfo)
+            const { idx } = pickedParticle
+            const particleMesh = sps.particles[idx]
+            return particleMesh
+        },
+        startInteraction(pointerInfo, controllerMesh, context) {
+            const particleMesh = this.getPickedParticle(pointerInfo)
+            // TODO: Store particleMesh in a selectedMeshes
+            this.metadata.selectedParticles = this.metadata.selectedParticles || {}
+            this.metadata.selectedParticles[pointerInfo.event.pointerId] = particleMesh
+            const sps = this.metadata.sps
+            if (particleMesh.startInteraction) {
+                particleMesh.startInteraction(pointerInfo, controllerMesh, context)
+                sps.setParticles()
+            }
+        },
+        moveInteraction(pointerInfo, context) {
+            // console.log('moveInteraction', pointerInfo)
+            // pickedMesh is this
+            const particleMesh = this.metadata.selectedParticles[pointerInfo.event.pointerId]
+            // const particleMesh = this.getPickedParticle(pointerInfo)
+            const sps = this.metadata.sps
+            if (particleMesh.moveInteraction) {
+                particleMesh.moveInteraction(pointerInfo, context)
+                sps.setParticles()
+            }
+        },
+        endInteraction(pointerInfo, context) {
+            const particleMesh = this.metadata.selectedParticles[pointerInfo.event.pointerId]
+            const sps = this.metadata.sps
+            if (particleMesh.endInteraction) {
+                particleMesh.endInteraction(pointerInfo, context)
+                sps.setParticles()
+            }
+            this.metadata.selectedParticles[pointerInfo.event.pointerId] = undefined
+        }
+    })
+}
+
+export function addErasable(model) {
+    Object.assign(model, {
+        startInteraction(pointerInfo, controllerMesh, context) {
+            this.props = this.props || {}
+            this.props.on = !this.props.on
+            this.scaling = (this.props.on) ? BABYLON.Vector3.One() : BABYLON.Vector3.Zero()
+        },
+        moveInteraction(pointerInfo, context) {
+            // console.log('moveInteraction')
+        },
+        endInteraction(pointerInfo, context) {
+            // this.setParent(this.props.oldParent)
         }
     })
 }
@@ -25,7 +88,8 @@ export function addSpinnable(model, options) {
             const node = this.rotate(new BABYLON.Vector3(0, 0, 1), (pickedPoint.x > 0) ? -1 * Math.PI / 8 : Math.PI / 8 )
             ctx.sailing.rotation += delta
         },
-        moveInteraction(pointerInfo, pickedMesh, ctx) {
+        moveInteraction(pointerInfo, ctx) {
+            // pickedMesh is this
             // TODO: Make it rotate based on your movement around the axis
         },
         endInteraction() {
@@ -38,7 +102,7 @@ export function addAnchorControl(model, options) {
     Object.assign(model, {
         startInteraction(pointerInfo, controllerMesh, ctx) {
             ctx.sailing.speed = (ctx.sailing.speed === 0) ? 12 : 0
-            console.log('setting speed', ctx.sailing.speed)
+            // console.log('setting speed', ctx.sailing.speed)
         }
     })
 }

@@ -35,7 +35,6 @@ export async function setup(ctx) {
     ocean.checkCollisions = true
     if (xrDefault.teleportation) {
         xrDefault.teleportation.addFloorMesh(ocean)
-        console.log(xrDefault.teleportation.snapPointsOnly)
         xrDefault.teleportation.snapPointsOnly = true
     }
 

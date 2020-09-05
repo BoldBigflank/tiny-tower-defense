@@ -2,7 +2,7 @@ import './style.scss'
 import * as roomMuseum from './rooms/Museum.js'
 
 const {
-    Scene, Color3, Vector3, UniversalCamera, DynamicTexture, StandardMaterial, MeshBuilder, PointerEventTypes, WebXRState, CSG
+    Scene, Color3, Vector3, UniversalCamera, DynamicTexture, StandardMaterial, MeshBuilder, PointerEventTypes, WebXRState
 } = BABYLON
 
 const context = {}
@@ -33,7 +33,6 @@ const init = async () => {
 
     // Skybox
     const skybox = MeshBuilder.CreateSphere('skyBox', { diameter: 1000, segments: 100 }, scene)
-    // const skybox = MeshBuilder.CreateBox("skyBox", { size: 100 }, scene)
     const skyboxMaterial = new StandardMaterial('skyBox', scene)
     skyboxMaterial.backFaceCulling = false
     skyboxMaterial.disableLighting = true
@@ -55,7 +54,7 @@ const init = async () => {
     skybox.material = skyboxMaterial
 
     // Add a camera to the scene and attach it to the canvas
-    const camera = new UniversalCamera('Camera', new Vector3(0, 2.01, 1), scene)
+    const camera = new UniversalCamera('Camera', new Vector3(0, 2.01, 2), scene)
     camera.rotation = new Vector3(0, Math.PI, 0)
     camera.attachControl(canvas, true)
     camera.speed = 0.1
@@ -64,14 +63,9 @@ const init = async () => {
     camera.ellipsoid = new Vector3(1, 1, 1)
     camera.checkCollisions = true
 
-    let blockMesh = MeshBuilder.CreateBox('Box', { size: 0.4 }, scene)
-    blockMesh.position = new Vector3(0, 1.2, 0)
-    const blockCSG = CSG.FromMesh(blockMesh)
-
     // XR start
     const xrDefault = await scene.createDefaultXRExperienceAsync() // WebXRDefaultExperience
     xrDefault.input.onControllerAddedObservable.add((xrInput) => {
-        const box = MeshBuilder.CreateBox('gripBox', { size: 0.05, depth: 0.5 }, scene)
         xrInput.onMotionControllerInitObservable.add((motionController) => {
             // Watch for trigger events
             console.log(motionController.getComponentIds())
@@ -81,29 +75,17 @@ const init = async () => {
                 console.log('its a button')
                 mainComponent.onButtonStateChangedObservable.add((component) => {
                     console.log('button pressed', component.value)
-                    if (component.value !== 1) {
-                        // Do a trigger event
-                        box.scaling = Vector3.Zero()
-                    } else {
-                        box.scaling = Vector3.One()
-                        // CSG the box
-                        const boxCSG = CSG.FromMesh(box)
-                        blockCSG.subtractInPlace(boxCSG)
-                        let newBlock = blockCSG.toMesh(blockMesh.name, blockMesh.material, scene)
-                        blockMesh.dispose()
-                        blockMesh = newBlock
-
-                    }
+                    context.mainComponentActive = (component.value === 1)
                 })
             } else if (mainComponent.isAxes()) {
                 console.log('its an axes')
                 mainComponent.onAxisValueChangedObservable.add((values) => {
                     console.log('axis changed', values.x, values.y)
+                    context.mainComponentActive = (values.x === 1 || values.y === 1)
                 })
             }
             motionController.onModelLoadedObservable.add((model) => {
-                box.position = new Vector3(0, 0, 0.27)
-                box.parent = xrInput.grip
+                // Attach stuff to the controllers if you want
             })
         })
     })
@@ -132,13 +114,15 @@ const init = async () => {
 
     // Interactions
     context.selectedMeshes = {}
+
     // POINTERDOWN
     scene.onPointerObservable.add((pointerInfo) => {
-        const { pickedMesh, hit } = pointerInfo.pickInfo
+        const { pickInfo } = pointerInfo
+        const { hit } = pickInfo
+        const { pickedMesh } = pickInfo
         if (!hit) return
         if (!pickedMesh) return
         if (!pickedMesh.startInteraction) return
-        // console.log('POINTER DOWN', pointerInfo)
         context.selectedMeshes[pointerInfo.event.pointerId] = pickedMesh
         if (xrHelper && xrHelper.state === WebXRState.IN_XR) { // XR Mode
             const xrInput = xrDefault.pointerSelection.getXRControllerByPointerId(pointerInfo.event.pointerId)
@@ -156,8 +140,7 @@ const init = async () => {
     scene.onPointerObservable.add((pointerInfo) => {
         const pickedMesh = context.selectedMeshes[pointerInfo.event.pointerId]
         if (pickedMesh && pickedMesh.moveInteraction) {
-            // console.log('POINTER MOVE', pointerInfo)
-            pickedMesh.moveInteraction(pointerInfo, pickedMesh, context)
+            pickedMesh.moveInteraction(pointerInfo, context)
         }
     }, PointerEventTypes.POINTERMOVE)
 
