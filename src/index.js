@@ -54,8 +54,8 @@ const init = async () => {
     skybox.material = skyboxMaterial
 
     // Add a camera to the scene and attach it to the canvas
-    const camera = new UniversalCamera('Camera', new Vector3(0, 2.01, 2), scene)
-    camera.rotation = new Vector3(0, Math.PI, 0)
+    const camera = new UniversalCamera('Camera', new Vector3(0, 2.01, -2), scene)
+    // camera.rotation = new Vector3(0, Math.PI, 0)
     camera.attachControl(canvas, true)
     camera.speed = 0.1
     camera.angularSensibility = 9000
