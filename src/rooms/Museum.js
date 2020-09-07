@@ -1,8 +1,5 @@
-import { intersectDrawings, createColorMaterial } from '../utils/meshGenerator'
-import { addGrabbable, addAnchorControl, addSpinnable } from '../utils/behaviors'
-import { shipBack, shipDeck, shipFront, desk } from '../content/models.js'
-import * as WavesStation from './Waves'
-import * as IslandsStation from './Islands'
+import { createColorMaterial } from '../utils/meshGenerator'
+import { catBlock } from '../content/models.js'
 import * as SculpturesStation from './Sculptures'
 
 const {
@@ -38,7 +35,8 @@ export async function setup(ctx) {
         xrDefault.teleportation.snapPointsOnly = true
     }
 
-    SculpturesStation.setup(ctx)
+    // The cat block puzzle
+    SculpturesStation.setup(catBlock, ctx)
 }
 
 export function enter(ctx) {

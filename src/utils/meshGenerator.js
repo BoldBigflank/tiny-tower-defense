@@ -1,6 +1,6 @@
 // import { Vector3, CSG, Mesh, MeshBuilder } from 'babylonjs'
 
-const { Vector3, Color3, MeshBuilder, Mesh, CSG, StandardMaterial } = BABYLON
+const { Vector3, Color3, MeshBuilder, Mesh, CSG, StandardMaterial, SolidParticleSystem } = BABYLON
 
 const GRID_TO_UNITS = 1 / 3
 
@@ -99,4 +99,52 @@ const intersectDrawings = (modelObject) => {
     return resultMesh
 }
 
-export { intersectDrawings, createColorMaterial }
+const blockMesh = (modelObject, scene) => {
+    // Convert the object points to binary
+    const { size, blocks } = modelObject
+    const [WIDTH, HEIGHT, DEPTH] = size
+    const [sideString, topString, frontString] = blocks
+    const side = sideString.padStart(DEPTH * HEIGHT, '0').split('')
+    const top = topString.padStart(WIDTH * DEPTH, '0').split('')
+    const front = frontString.padStart(WIDTH * HEIGHT, '0').split('')
+    const BOX_SIZE = 1 / WIDTH
+    // Make a SPS
+    // First create the SPS
+    const SPS = new SolidParticleSystem('SPS', scene, { isPickable: true })
+    const box = MeshBuilder.CreateBox('b', { size: BOX_SIZE })
+    SPS.addShape(box, WIDTH * HEIGHT * DEPTH)
+    box.dispose()
+    const sculptureMesh = SPS.buildMesh() // finally builds and displays the real mesh
+    sculptureMesh.metadata = { sps: SPS }
+    sculptureMesh.position.y = 1
+
+    SPS.initParticles = function () {
+        for (let i = 0; i < SPS.nbParticles; i++) {
+            const particle = SPS.particles[i]
+            particle.props = { on: true }
+            // Set the initial position
+            const tileX = (i % WIDTH)
+            const tileY = Math.floor(i / HEIGHT) % DEPTH
+            const tileZ = Math.floor(Math.floor(i / WIDTH) / HEIGHT)
+            particle.position = new Vector3(
+                BOX_SIZE * (tileX - 0.5) - 0.5,
+                BOX_SIZE * (tileY + 0.5) - 0.5,
+                BOX_SIZE * (tileZ - 0.5) - 0.5
+            )
+            // Scale based on the modelObject
+            const sideBool = parseInt(side[tileY * DEPTH + tileZ]) === 1
+            const topBool = parseInt(top[tileZ * WIDTH + tileX]) === 1
+            const frontBool = parseInt(front[tileY * WIDTH + tileX]) === 1
+            particle.scaling = (sideBool && topBool && frontBool) ? Vector3.One() : Vector3.Zero()
+            // addErasable(particle)
+        }
+    }
+    // addSPSEvents(sculptureMesh)
+
+    SPS.initParticles()
+    SPS.setParticles()
+    SPS.refreshVisibleSize() // force the BBox recomputation
+    return sculptureMesh
+}
+
+export { intersectDrawings, createColorMaterial, blockMesh }
