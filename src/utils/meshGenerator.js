@@ -1,6 +1,8 @@
 // import { Vector3, CSG, Mesh, MeshBuilder } from 'babylonjs'
 
-const { Vector3, Color3, MeshBuilder, Mesh, CSG, StandardMaterial, SolidParticleSystem } = BABYLON
+const {
+    Vector3, Color3, MeshBuilder, Mesh, CSG, StandardMaterial, SolidParticleSystem, DynamicTexture
+} = BABYLON
 
 const GRID_TO_UNITS = 1 / 3
 
@@ -118,7 +120,7 @@ const blockMesh = (modelObject, scene) => {
     sculptureMesh.metadata = { sps: SPS }
     sculptureMesh.position.y = 1
 
-    SPS.initParticles = function () {
+    SPS.initParticles = function() {
         for (let i = 0; i < SPS.nbParticles; i++) {
             const particle = SPS.particles[i]
             particle.props = { on: true }
@@ -147,4 +149,45 @@ const blockMesh = (modelObject, scene) => {
     return sculptureMesh
 }
 
-export { intersectDrawings, createColorMaterial, blockMesh }
+const textPanelMesh = (text, scene) => {
+    const panelWidth = 512
+    const panelHeight = 341
+    const mesh = MeshBuilder.CreatePlane('TextMesh', { width: 1, height: 2 / 3 }, scene)
+
+    const borderRadius = 64
+    const texture = new DynamicTexture('TextTexture', { width: panelWidth, height: panelHeight }, scene)
+    const material = new StandardMaterial('TextMaterial', scene)
+    material.diffuseTexture = texture
+    material.diffuseTexture.hasAlpha = true
+    mesh.material = material
+    mesh.updateText = function(text) {
+        const texture = this.material.diffuseTexture
+        const context = texture.getContext()
+        context.fillStyle = 'transparent'
+        context.fillRect(0, 0, panelWidth, panelHeight)
+    
+        // Rounded background
+        context.beginPath()
+        context.moveTo(panelWidth, panelHeight)
+        context.arcTo(0, panelHeight, 0, 0, borderRadius) // bottom left
+        context.arcTo(0, 0, panelWidth, 0, borderRadius) // top left
+        context.arcTo(panelWidth, 0, panelWidth, panelHeight, borderRadius) // top right
+        context.arcTo(panelWidth, panelHeight, 0, panelHeight, borderRadius) // bottom right
+        context.fillStyle = 'black'
+        context.fill()
+    
+        // Text
+        context.font = '64px Helvetica'
+        context.fillStyle = 'white'
+        context.fillText(text, 100, 100)
+        texture.update()
+        mesh.billboardMode = Mesh.BILLBOARDMODE_Y
+    }
+    mesh.rotate(Vector3.Right(), Math.PI / 8)
+    mesh.updateText(text)
+    return mesh
+}
+
+export {
+    intersectDrawings, createColorMaterial, blockMesh, textPanelMesh
+}

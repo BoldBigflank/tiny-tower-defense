@@ -73,7 +73,7 @@ export function addErasable(model) {
             this.scaling = (this.props.on) ? BABYLON.Vector3.One() : BABYLON.Vector3.Zero()
         },
         moveInteraction(pointerInfo, context) {
-            this.scaling = BABYLON.Vector3.Zero()
+            // this.scaling = BABYLON.Vector3.Zero()
         },
         endInteraction(pointerInfo, context) {
             // this.setParent(this.props.oldParent)
