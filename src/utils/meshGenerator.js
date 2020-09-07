@@ -101,7 +101,7 @@ const intersectDrawings = (modelObject) => {
 
 const blockMesh = (modelObject, scene) => {
     // Convert the object points to binary
-    const { size, blocks } = modelObject
+    const { size, blocks, pickable } = modelObject
     const [WIDTH, HEIGHT, DEPTH] = size
     const [sideString, topString, frontString] = blocks
     const side = sideString.padStart(DEPTH * HEIGHT, '0').split('')
@@ -110,7 +110,7 @@ const blockMesh = (modelObject, scene) => {
     const BOX_SIZE = 1 / WIDTH
     // Make a SPS
     // First create the SPS
-    const SPS = new SolidParticleSystem('SPS', scene, { isPickable: true })
+    const SPS = new SolidParticleSystem('SPS', scene, { isPickable: pickable })
     const box = MeshBuilder.CreateBox('b', { size: BOX_SIZE })
     SPS.addShape(box, WIDTH * HEIGHT * DEPTH)
     box.dispose()
@@ -127,9 +127,9 @@ const blockMesh = (modelObject, scene) => {
             const tileY = Math.floor(i / HEIGHT) % DEPTH
             const tileZ = Math.floor(Math.floor(i / WIDTH) / HEIGHT)
             particle.position = new Vector3(
-                BOX_SIZE * (tileX - 0.5) - 0.5,
+                BOX_SIZE * (tileX + 0.5) - 0.5,
                 BOX_SIZE * (tileY + 0.5) - 0.5,
-                BOX_SIZE * (tileZ - 0.5) - 0.5
+                BOX_SIZE * (tileZ + 0.5) - 0.5
             )
             // Scale based on the modelObject
             const sideBool = parseInt(side[tileY * DEPTH + tileZ]) === 1
