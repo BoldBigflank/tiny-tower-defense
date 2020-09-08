@@ -2,15 +2,37 @@ import { colorNME } from '../shaders/colorNME'
 import { addErasable, addSPSEvents, addGrabbable } from '../utils/behaviors'
 import { blockMesh, textPanelMesh } from '../utils/meshGenerator'
 import { blankBlock } from '../content/models'
+import constants from '../utils/constants'
 
 const {
     Vector3, Mesh, MeshBuilder, StandardMaterial
 } = BABYLON
 
 export async function setup(blockObject, ctx) {
-    const { scene, engine, xrDefault } = ctx
+    const { scene, engine } = ctx
     // * The parent mesh
     const parentMesh = new Mesh('Sculpture Station', scene)
+    parentMesh.metadata = {
+        inProgress: false,
+        timer: 0,
+        counter: 0
+    }
+    parentMesh.startGame = function() {
+        const { sculpture } = this.metadata
+        const sps = sculpture.metadata.sps
+        for (let i = 0; i < sps.nbParticles; i++) {
+            const particle = sps.particles[i]
+            particle.scaling = Vector3.One()
+            particle.props.on = true
+        }
+        sps.setParticles()
+        this.metadata.inProgress = true
+        this.metadata.timer = constants.maxTime
+    }
+    parentMesh.endGame = function() {
+        this.metadata.inProgress = false
+        // TODO: Save the particles to localstorage
+    }
     // * Base
     const baseMesh = MeshBuilder.CreateBox('Pedestal', { height: 1.25, width: 0.4, depth: 0.4 }, scene)
     baseMesh.checkCollisions = true
@@ -21,6 +43,7 @@ export async function setup(blockObject, ctx) {
     solutionMesh.material = colorNME()
     solutionMesh.position = new Vector3(-1, 1.5, 0)
     solutionMesh.scaling = new Vector3(0.5, 0.5, 0.5)
+    parentMesh.metadata.solution = solutionMesh
 
     const box = MeshBuilder.CreateBox('Helper-Box', { size: 0.51 }, scene)
     box.position = new Vector3(-1, 1.5, 0)
@@ -38,10 +61,13 @@ export async function setup(blockObject, ctx) {
     const mesh = blockMesh(blankBlock, scene)
     mesh.scaling = new Vector3(0.5, 0.5, 0.5)
     mesh.position = new Vector3(0, 1.5, 0)
-
+    parentMesh.metadata.sculpture = mesh
+    
     // Add events for the sps and particles
     addSPSEvents(mesh)
+    mesh.metadata.parent = parentMesh
     const sps = mesh.metadata.sps
+    // TODO: Load the stored particles from localStorage
     for (let i = 0; i < sps.nbParticles; i++) {
         const particle = sps.particles[i]
         addErasable(particle)
@@ -55,12 +81,32 @@ export async function setup(blockObject, ctx) {
     // Info Panel
     const infoPanel = textPanelMesh('Hello', scene)
     infoPanel.position = new Vector3(1, 1, 0)
-    let timer = 120
     scene.registerBeforeRender(() => {
+        let { timer, counter, inProgress } = parentMesh.metadata
+        // console.log('timer', timer)
         const dt = engine.getDeltaTime() / 1000
-        timer -= dt
-        // TODO: Get the percent and display it
-        infoPanel.updateText(Math.ceil(timer))
+        timer = Math.max(0, timer - dt)
+        counter -= 1
+        if (inProgress && timer === 0) { // Time's up
+            parentMesh.endGame()
+        }
+        if (counter <= 0) { // Only update 1/s
+            let text = ''
+            text += Math.ceil(timer) + '|'
+            // TODO: Get the percent and display it
+            const solutionParticles = solutionMesh.metadata.sps
+            const sculptureParticles = mesh.metadata.sps
+            let correct = 0
+            const total = solutionParticles.nbParticles
+            for (let i = 0; i < solutionParticles.nbParticles; i++) {
+                if (solutionParticles.particles[i].props.on === sculptureParticles.particles[i].props.on) correct += 1
+            }
+            text += `${Math.floor((correct / total) * 100)}%`
+            infoPanel.updateText(text)
+            counter = constants.percentUpdateFrames
+        }
+        parentMesh.metadata.timer = timer
+        parentMesh.metadata.counter = counter
     })
 
     // Buttons
@@ -70,12 +116,7 @@ export async function setup(blockObject, ctx) {
     const startButton = MeshBuilder.CreateBox('Start-Button', { size: 0.25 }, scene)
     startButton.position = new Vector3(0, 0.25, -0.25)
     startButton.startInteraction = () => {
-        timer = 120
-        for (let i = 0; i < sps.nbParticles; i++) {
-            const particle = sps.particles[i]
-            particle.scaling = Vector3.One()
-        }
-        sps.setParticles()
+        parentMesh.startGame()
     }
 
     // Put it all together

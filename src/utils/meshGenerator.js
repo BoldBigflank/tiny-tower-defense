@@ -137,7 +137,8 @@ const blockMesh = (modelObject, scene) => {
             const sideBool = parseInt(side[tileY * DEPTH + tileZ]) === 1
             const topBool = parseInt(top[tileZ * WIDTH + tileX]) === 1
             const frontBool = parseInt(front[tileY * WIDTH + tileX]) === 1
-            particle.scaling = (sideBool && topBool && frontBool) ? Vector3.One() : Vector3.Zero()
+            particle.props.on = (sideBool && topBool && frontBool)
+            particle.scaling = particle.props.on ? Vector3.One() : Vector3.Zero()
             // addErasable(particle)
         }
     }
@@ -164,8 +165,9 @@ const textPanelMesh = (text, scene) => {
         const texture = this.material.diffuseTexture
         const context = texture.getContext()
         context.fillStyle = 'transparent'
-        context.fillRect(0, 0, panelWidth, panelHeight)
-    
+        // context.fillRect(0, 0, panelWidth, panelHeight)
+        context.clearRect(0, 0, panelWidth, panelHeight)
+
         // Rounded background
         context.beginPath()
         context.moveTo(panelWidth, panelHeight)
@@ -175,11 +177,15 @@ const textPanelMesh = (text, scene) => {
         context.arcTo(panelWidth, panelHeight, 0, panelHeight, borderRadius) // bottom right
         context.fillStyle = 'black'
         context.fill()
-    
+
         // Text
         context.font = '64px Helvetica'
         context.fillStyle = 'white'
-        context.fillText(text, 100, 100)
+        const lines = text.split('|')
+        lines.forEach((line, i) => {
+            // TODO: Do hacks to color the % and timer lines using regex matching
+            context.fillText(line, 100, 100 + i * 64)
+        })
         texture.update()
         mesh.billboardMode = Mesh.BILLBOARDMODE_Y
     }

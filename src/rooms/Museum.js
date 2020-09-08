@@ -38,7 +38,7 @@ export async function setup(ctx) {
     // The cat block puzzle
     const catSculpture = await SculpturesStation.setup(catBlock, ctx)
     console.log(catSculpture)
-    catSculpture.position.z = 10
+    catSculpture.position.z = 5
     // Position it, then add the snap points
     const snapPoints = catSculpture.getChildMeshes(true, (child) => child.name === 'SnapPoint')
     snapPoints.forEach((snapPoint) => {

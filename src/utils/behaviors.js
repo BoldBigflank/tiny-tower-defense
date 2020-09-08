@@ -37,6 +37,7 @@ export function addSPSEvents(model) {
             this.metadata.selectedParticles = this.metadata.selectedParticles || {}
             this.metadata.selectedParticles[pointerInfo.event.pointerId] = particleMesh
             const sps = this.metadata.sps
+            if (!this.metadata.parent.metadata.inProgress) return
             if (particleMesh.startInteraction) {
                 particleMesh.startInteraction(pointerInfo, controllerMesh, context)
                 sps.setParticles()
