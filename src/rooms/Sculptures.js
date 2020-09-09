@@ -20,7 +20,7 @@ export async function setup(blockObject, ctx) {
         counter: 0
     }
     parentMesh.startGame = function() {
-        const { sculpture } = this.metadata
+        const { sculpture, solution } = this.metadata
         const sps = sculpture.metadata.sps
         for (let i = 0; i < sps.nbParticles; i++) {
             const particle = sps.particles[i]
@@ -30,12 +30,14 @@ export async function setup(blockObject, ctx) {
         sps.setParticles()
         this.metadata.inProgress = true
         this.metadata.timer = constants.maxTime
+        solution.parent.scaling = Vector3.One()
+
     }
     parentMesh.endGame = function() {
         console.log('endGame')
         this.metadata.inProgress = false
         // TODO: Save the particles to localstorage
-        const { sculpture } = this.metadata
+        const { sculpture, solution } = this.metadata
         const sps = sculpture.metadata.sps
         const particleExport = []
         for (let i = 0; i < sps.nbParticles; i++) {
@@ -44,6 +46,7 @@ export async function setup(blockObject, ctx) {
         }
 
         if (myStorage.isSupported) myStorage.set(parentMesh.name, particleExport.join(''))
+        solution.parent.scaling = Vector3.Zero()
     }
     // * Base
     const baseMesh = MeshBuilder.CreateBox('Pedestal', { height: 1.25, width: 0.4, depth: 0.4 }, scene)
@@ -56,16 +59,16 @@ export async function setup(blockObject, ctx) {
     solutionMesh.position = new Vector3(-1, 1.5, 0)
     solutionMesh.scaling = new Vector3(0.5, 0.5, 0.5)
     parentMesh.metadata.solution = solutionMesh
-
+    // The solution's box
     const box = MeshBuilder.CreateBox('Helper-Box', { size: 0.51 }, scene)
     box.position = new Vector3(-1, 1.5, 0)
     box.material = new StandardMaterial('box')
     box.material.alpha = 0.5
-
+    
     const box2 = box.clone('Helper-Box2')
     box2.isPickable = false
     box2.position.x = 0
-
+    
     solutionMesh.setParent(box)
     addGrabbable(box)
 
@@ -75,6 +78,8 @@ export async function setup(blockObject, ctx) {
     if (myStorage.isSupported) {
         const particleString = myStorage.get(parentMesh.name)
         if (particleString) {
+            // Hide the solution
+            solutionMesh.parent.scaling = Vector3.Zero()
             const particleImport = particleString.split('')
             const blankSps = mesh.metadata.sps
             for (let i = 0; i < blankSps.nbParticles; i++) {
