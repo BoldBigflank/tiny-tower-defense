@@ -3,15 +3,17 @@ import { addErasable, addSPSEvents, addGrabbable } from '../utils/behaviors'
 import { blockMesh, textPanelMesh } from '../utils/meshGenerator'
 import { blankBlock } from '../content/models'
 import constants from '../utils/constants'
+import { Storage } from '../utils/Storage'
 
 const {
     Vector3, Mesh, MeshBuilder, StandardMaterial
 } = BABYLON
 
 export async function setup(blockObject, ctx) {
+    const myStorage = new Storage()
     const { scene, engine } = ctx
     // * The parent mesh
-    const parentMesh = new Mesh('Sculpture Station', scene)
+    const parentMesh = new Mesh(blockObject.name, scene)
     parentMesh.metadata = {
         inProgress: false,
         timer: 0,
@@ -30,8 +32,18 @@ export async function setup(blockObject, ctx) {
         this.metadata.timer = constants.maxTime
     }
     parentMesh.endGame = function() {
+        console.log('endGame')
         this.metadata.inProgress = false
         // TODO: Save the particles to localstorage
+        const { sculpture } = this.metadata
+        const sps = sculpture.metadata.sps
+        const particleExport = []
+        for (let i = 0; i < sps.nbParticles; i++) {
+            const particle = sps.particles[i]
+            particleExport.push((particle.props.on) ? 1 : 0)
+        }
+
+        if (myStorage.isSupported) myStorage.set(parentMesh.name, particleExport.join(''))
     }
     // * Base
     const baseMesh = MeshBuilder.CreateBox('Pedestal', { height: 1.25, width: 0.4, depth: 0.4 }, scene)
@@ -59,10 +71,24 @@ export async function setup(blockObject, ctx) {
 
     // The blank canvas
     const mesh = blockMesh(blankBlock, scene)
+    // If there's one stored in localstorage, do that one
+    if (myStorage.isSupported) {
+        const particleString = myStorage.get(parentMesh.name)
+        if (particleString) {
+            const particleImport = particleString.split('')
+            const blankSps = mesh.metadata.sps
+            for (let i = 0; i < blankSps.nbParticles; i++) {
+                const on = parseInt(particleImport[i], 10) === 1
+                blankSps.particles[i].props.on = on
+                blankSps.particles[i].scaling = (on) ? Vector3.One() : Vector3.Zero()
+            }
+            blankSps.setParticles()
+        }
+    }
     mesh.scaling = new Vector3(0.5, 0.5, 0.5)
     mesh.position = new Vector3(0, 1.5, 0)
     parentMesh.metadata.sculpture = mesh
-    
+
     // Add events for the sps and particles
     addSPSEvents(mesh)
     mesh.metadata.parent = parentMesh
@@ -92,14 +118,19 @@ export async function setup(blockObject, ctx) {
         }
         if (counter <= 0) { // Only update 1/s
             let text = ''
-            text += Math.ceil(timer) + '|'
+            text += `${Math.ceil(timer)}|`
             // TODO: Get the percent and display it
             const solutionParticles = solutionMesh.metadata.sps
             const sculptureParticles = mesh.metadata.sps
             let correct = 0
-            const total = solutionParticles.nbParticles
+            let total = 0
             for (let i = 0; i < solutionParticles.nbParticles; i++) {
-                if (solutionParticles.particles[i].props.on === sculptureParticles.particles[i].props.on) correct += 1
+                if (!solutionParticles.particles[i].props.on) {
+                    total += 1
+                    if (!sculptureParticles.particles[i].props.on) {
+                        correct += 1
+                    }
+                }
             }
             text += `${Math.floor((correct / total) * 100)}%`
             infoPanel.updateText(text)
