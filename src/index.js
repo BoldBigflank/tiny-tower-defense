@@ -161,7 +161,12 @@ const init = async () => {
 
     engine.hideLoadingUI()
 
-    scene.debugLayer.show()
+    document.addEventListener('keydown', (event) => {
+        if (event.key === 'p') {
+            (scene.debugLayer.isVisible()) ? scene.debugLayer.hide() : scene.debugLayer.show()
+        }
+        return false
+    })
 
     // run the render loop
     engine.runRenderLoop(() => {

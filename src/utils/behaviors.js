@@ -38,9 +38,10 @@ export function addSPSEvents(model) {
             this.metadata.selectedParticles[pointerInfo.event.pointerId] = particleMesh
             const sps = this.metadata.sps
             if (!this.metadata.parent.metadata.inProgress) return
-            if (particleMesh.startInteraction) {
+            if (particleMesh && particleMesh.startInteraction) {
                 particleMesh.startInteraction(pointerInfo, controllerMesh, context)
                 sps.setParticles()
+                sps.computeSubMeshes()
             }
         },
         moveInteraction(pointerInfo, context) {
@@ -57,7 +58,7 @@ export function addSPSEvents(model) {
         endInteraction(pointerInfo, context) {
             const particleMesh = this.metadata.selectedParticles[pointerInfo.event.pointerId]
             const sps = this.metadata.sps
-            if (particleMesh.endInteraction) {
+            if (particleMesh && particleMesh.endInteraction) {
                 particleMesh.endInteraction(pointerInfo, context)
                 sps.setParticles()
             }
@@ -69,9 +70,15 @@ export function addSPSEvents(model) {
 export function addErasable(model) {
     Object.assign(model, {
         startInteraction(pointerInfo, controllerMesh, context) {
+            let refresh = false
             this.props = this.props || {}
-            this.props.on = !this.props.on
-            this.scaling = (this.props.on) ? BABYLON.Vector3.One() : BABYLON.Vector3.Zero()
+            this.props.state = 0
+            const { correctState } = this.props
+            if (correctState === 1) { // You chose poorly
+                this.materialIndex = 1
+            } else { // You chose correctly
+                this.scaling = BABYLON.Vector3.Zero()
+            }
         },
         moveInteraction(pointerInfo, context) {
             // this.scaling = BABYLON.Vector3.Zero()

@@ -1,15 +1,27 @@
 import { colorNME } from '../shaders/colorNME'
 import { addErasable, addSPSEvents, addGrabbable } from '../utils/behaviors'
-import { blockMesh, textPanelMesh } from '../utils/meshGenerator'
+import { blockMesh, textPanelMesh, createColorMaterial } from '../utils/meshGenerator'
 import { blankBlock } from '../content/models'
 import constants from '../utils/constants'
 import { Storage } from '../utils/Storage'
 
 const {
-    Vector3, Mesh, MeshBuilder, StandardMaterial
+    Vector3, Mesh, MeshBuilder, StandardMaterial, Color3
 } = BABYLON
 
+const humanReadableTimer = (time) => {
+    let result = ''
+    const minutes = Math.floor(time / (60))
+    result += `${minutes}:`
+    const seconds = Math.floor(time - (minutes * 60))
+    result += `${seconds.toString().padStart(2, '0')}`
+    return result
+}
+
 export async function setup(blockObject, ctx) {
+    const redColorMaterial = createColorMaterial(new Color3(1.0, 0, 0))
+    const colorMaterial = colorNME()
+
     const myStorage = new Storage()
     const { scene, engine } = ctx
     // * The parent mesh
@@ -25,16 +37,16 @@ export async function setup(blockObject, ctx) {
         for (let i = 0; i < sps.nbParticles; i++) {
             const particle = sps.particles[i]
             particle.scaling = Vector3.One()
-            particle.props.on = true
+            particle.props.state = 1
+            particle.materialIndex = 0
         }
         sps.setParticles()
+        sps.computeSubMeshes()
         this.metadata.inProgress = true
         this.metadata.timer = constants.maxTime
         solution.parent.scaling = Vector3.One()
-
     }
     parentMesh.endGame = function() {
-        console.log('endGame')
         this.metadata.inProgress = false
         // TODO: Save the particles to localstorage
         const { sculpture, solution } = this.metadata
@@ -42,7 +54,7 @@ export async function setup(blockObject, ctx) {
         const particleExport = []
         for (let i = 0; i < sps.nbParticles; i++) {
             const particle = sps.particles[i]
-            particleExport.push((particle.props.on) ? 1 : 0)
+            particleExport.push(particle.props.state)
         }
 
         if (myStorage.isSupported) myStorage.set(parentMesh.name, particleExport.join(''))
@@ -54,8 +66,9 @@ export async function setup(blockObject, ctx) {
     baseMesh.position = new Vector3(0, 1.25 / 2, 0)
 
     // * The solution
-    const solutionMesh = blockMesh(blockObject, scene)
-    solutionMesh.material = colorNME()
+    const solutionMesh = blockMesh(blockObject, null, scene)
+    solutionMesh.metadata.sps.setMultiMaterial([colorNME(), redColorMaterial])
+    // solutionMesh.material = colorNME()
     solutionMesh.position = new Vector3(-1, 1.5, 0)
     solutionMesh.scaling = new Vector3(0.5, 0.5, 0.5)
     parentMesh.metadata.solution = solutionMesh
@@ -73,7 +86,8 @@ export async function setup(blockObject, ctx) {
     addGrabbable(box)
 
     // The blank canvas
-    const mesh = blockMesh(blankBlock, scene)
+    const mesh = blockMesh(blankBlock, solutionMesh.metadata.sps.particles, scene)
+    mesh.metadata.sps.setMultiMaterial([colorMaterial, redColorMaterial, redColorMaterial])
     // If there's one stored in localstorage, do that one
     if (myStorage.isSupported) {
         const particleString = myStorage.get(parentMesh.name)
@@ -83,10 +97,13 @@ export async function setup(blockObject, ctx) {
             const particleImport = particleString.split('')
             const blankSps = mesh.metadata.sps
             for (let i = 0; i < blankSps.nbParticles; i++) {
-                const on = parseInt(particleImport[i], 10) === 1
-                blankSps.particles[i].props.on = on
-                blankSps.particles[i].scaling = (on) ? Vector3.One() : Vector3.Zero()
+                const state = parseInt(particleImport[i], 10)
+                blankSps.particles[i].props.state = state
+                const { correctState } = blankSps.particles[i].props
+                blankSps.particles[i].scaling = (state === 1 || correctState === 1) ? Vector3.One() : Vector3.Zero()
+                blankSps.particles[i].materialIndex = (state === 0 && correctState === 1) ? 1 : 0
             }
+            blankSps.computeSubMeshes()
             blankSps.setParticles()
         }
     }
@@ -111,7 +128,6 @@ export async function setup(blockObject, ctx) {
     infoPanel.scaling = new Vector3(0.7, 0.7, 0.7)
     scene.registerBeforeRender(() => {
         let { timer, counter, inProgress } = parentMesh.metadata
-        // console.log('timer', timer)
         const dt = engine.getDeltaTime() / 1000
         timer = Math.max(0, timer - dt)
         counter -= 1
@@ -119,23 +135,26 @@ export async function setup(blockObject, ctx) {
             parentMesh.endGame()
         }
         if (counter <= 0) { // Only update 1/s
-            let text = `${blockObject.name}|`
-            if (timer > 0) {
-                text += `${Math.ceil(timer)}|`
-            }
+            let text = (timer > 0) ? `${humanReadableTimer(timer)}` : `${blockObject.name}`
             const solutionParticles = solutionMesh.metadata.sps
             const sculptureParticles = mesh.metadata.sps
             let correct = 0
             let total = 0
+            let mistakes = 0
             for (let i = 0; i < solutionParticles.nbParticles; i++) {
-                if (!solutionParticles.particles[i].props.on) {
+                if (solutionParticles.particles[i].props.state === 0) { // Should be empty
                     total += 1
-                    if (!sculptureParticles.particles[i].props.on) {
+                    if (sculptureParticles.particles[i].props.state === 0) { // Is empty
                         correct += 1
                     }
+                } else if (sculptureParticles.particles[i].props.state === 0) { // Should be filled and Is not filled
+                    mistakes += 1
                 }
             }
-            text += `${Math.floor((correct / total) * 100)}%`
+            text += `|${Math.floor((correct / total) * 100)}%`
+            if (mistakes) {
+                text += `|${mistakes} ${(mistakes === 1) ? 'mistake' : 'mistakes'}`
+            } 
             // TODO: Count and display mistakes
             infoPanel.updateText(text)
             counter = constants.percentUpdateFrames

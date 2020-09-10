@@ -101,7 +101,7 @@ const intersectDrawings = (modelObject) => {
     return resultMesh
 }
 
-const blockMesh = (modelObject, scene) => {
+const blockMesh = (modelObject, solutionParticles, scene) => {
     // Convert the object points to binary
     const { size, blocks, pickable } = modelObject
     const [WIDTH, HEIGHT, DEPTH] = size
@@ -112,7 +112,10 @@ const blockMesh = (modelObject, scene) => {
     const BOX_SIZE = 1 / WIDTH
     // Make a SPS
     // First create the SPS
-    const SPS = new SolidParticleSystem('SPS', scene, { isPickable: pickable })
+    const SPS = new SolidParticleSystem('SPS', scene, { 
+        isPickable: pickable,
+        useModelMaterial: true
+    })
     const box = MeshBuilder.CreateBox('b', { size: BOX_SIZE })
     SPS.addShape(box, WIDTH * HEIGHT * DEPTH)
     box.dispose()
@@ -121,9 +124,12 @@ const blockMesh = (modelObject, scene) => {
     sculptureMesh.position.y = 1
 
     SPS.initParticles = function() {
-        for (let i = 0; i < SPS.nbParticles; i++) {
+        for (let i = 0; i < SPS.nbParticles; i++) {3
             const particle = SPS.particles[i]
-            particle.props = { on: true }
+            particle.props = { state: 1 }
+            if (solutionParticles) {
+                particle.props.correctState = solutionParticles[i].props.state
+            }
             // Set the initial position
             const tileX = (i % WIDTH)
             const tileY = Math.floor(i / HEIGHT) % DEPTH
@@ -137,8 +143,8 @@ const blockMesh = (modelObject, scene) => {
             const sideBool = parseInt(side[tileY * DEPTH + tileZ]) === 1
             const topBool = parseInt(top[tileZ * WIDTH + tileX]) === 1
             const frontBool = parseInt(front[tileY * WIDTH + tileX]) === 1
-            particle.props.on = (sideBool && topBool && frontBool)
-            particle.scaling = particle.props.on ? Vector3.One() : Vector3.Zero()
+            particle.props.state = (sideBool && topBool && frontBool) ? 1 : 0
+            particle.scaling = (particle.props.state === 1) ? Vector3.One() : Vector3.Zero()
             // addErasable(particle)
         }
     }
@@ -184,7 +190,7 @@ const textPanelMesh = (text, scene) => {
         const lines = text.split('|')
         lines.forEach((line, i) => {
             // TODO: Do hacks to color the % and timer lines using regex matching
-            context.fillText(line, 100, 100 + i * 64)
+            context.fillText(line, 75, 100 + i * 96)
         })
         texture.update()
     }

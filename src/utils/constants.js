@@ -1,4 +1,4 @@
 export default {
-    maxTime: 120,
+    maxTime: 245,
     percentUpdateFrames: 60
 }

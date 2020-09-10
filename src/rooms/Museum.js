@@ -6,8 +6,6 @@ const {
     Color3, Vector3, HemisphericLight, PointLight, StandardMaterial, MeshBuilder, TransformNode, WebXRState
 } = BABYLON
 
-const DegreesToRadians = (degrees) => degrees / 57.2958
-
 export async function setup(ctx) {
     // ctx is an object with the other rooms, assets,
     // I need access to textures
