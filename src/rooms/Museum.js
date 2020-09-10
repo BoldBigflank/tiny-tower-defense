@@ -1,5 +1,5 @@
 import { createColorMaterial } from '../utils/meshGenerator'
-import { catBlock } from '../content/models.js'
+import { catBlock, shipBlock, squiggleBlock, skullBlock } from '../content/models.js'
 import * as SculpturesStation from './Sculptures'
 
 const {
@@ -32,18 +32,24 @@ export async function setup(ctx) {
     ocean.checkCollisions = true
     if (xrDefault.teleportation) {
         xrDefault.teleportation.addFloorMesh(ocean)
-        xrDefault.teleportation.snapPointsOnly = true
+        // xrDefault.teleportation.snapPointsOnly = true
     }
 
     // The cat block puzzle
     const catSculpture = await SculpturesStation.setup(catBlock, ctx)
     console.log(catSculpture)
     catSculpture.position.z = 5
-    // Position it, then add the snap points
-    const snapPoints = catSculpture.getChildMeshes(true, (child) => child.name === 'SnapPoint')
-    snapPoints.forEach((snapPoint) => {
-        xrDefault.teleportation.addSnapPoint(snapPoint.getAbsolutePosition())
-    })
+
+    const shipSculpture = await SculpturesStation.setup(shipBlock, ctx)
+    shipSculpture.position = new Vector3(-3, 0, 5)
+
+    const squiggleSculpture = await SculpturesStation.setup(squiggleBlock, ctx)
+    squiggleSculpture.position = new Vector3(3, 0, 5)
+
+    const skullSculpture = await SculpturesStation.setup(skullBlock, ctx)
+    skullSculpture.position = new Vector3(-6, 0, 2.5)
+    skullSculpture.rotation.y = -1 * Math.PI / 2
+
 }
 
 export function enter(ctx) {

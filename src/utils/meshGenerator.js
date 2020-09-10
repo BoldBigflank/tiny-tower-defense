@@ -187,7 +187,6 @@ const textPanelMesh = (text, scene) => {
             context.fillText(line, 100, 100 + i * 64)
         })
         texture.update()
-        mesh.billboardMode = Mesh.BILLBOARDMODE_Y
     }
     mesh.rotate(Vector3.Right(), Math.PI / 8)
     mesh.updateText(text)

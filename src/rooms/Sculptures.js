@@ -105,13 +105,10 @@ export async function setup(blockObject, ctx) {
     }
     sps.setParticles()
 
-    // Teleport Pad
-    const snapPoint = MeshBuilder.CreateBox('SnapPoint', { height: 0.01, width: 1, depth: 1 }, scene)
-    snapPoint.position = new Vector3(0, 0.01, -1)
-
     // Info Panel
     const infoPanel = textPanelMesh('Hello', scene)
-    infoPanel.position = new Vector3(1, 1, 0)
+    infoPanel.position = new Vector3(0, 1, -0.3)
+    infoPanel.scaling = new Vector3(0.7, 0.7, 0.7)
     scene.registerBeforeRender(() => {
         let { timer, counter, inProgress } = parentMesh.metadata
         // console.log('timer', timer)
@@ -122,9 +119,10 @@ export async function setup(blockObject, ctx) {
             parentMesh.endGame()
         }
         if (counter <= 0) { // Only update 1/s
-            let text = ''
-            text += `${Math.ceil(timer)}|`
-            // TODO: Get the percent and display it
+            let text = `${blockObject.name}|`
+            if (timer > 0) {
+                text += `${Math.ceil(timer)}|`
+            }
             const solutionParticles = solutionMesh.metadata.sps
             const sculptureParticles = mesh.metadata.sps
             let correct = 0
@@ -138,6 +136,7 @@ export async function setup(blockObject, ctx) {
                 }
             }
             text += `${Math.floor((correct / total) * 100)}%`
+            // TODO: Count and display mistakes
             infoPanel.updateText(text)
             counter = constants.percentUpdateFrames
         }
@@ -159,7 +158,6 @@ export async function setup(blockObject, ctx) {
     baseMesh.setParent(parentMesh)
     box.setParent(parentMesh)
     box2.setParent(parentMesh)
-    snapPoint.setParent(parentMesh)
     infoPanel.setParent(parentMesh)
     mesh.setParent(parentMesh)
     startButton.setParent(parentMesh)
