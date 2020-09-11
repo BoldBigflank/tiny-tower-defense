@@ -101,6 +101,20 @@ const intersectDrawings = (modelObject) => {
     return resultMesh
 }
 
+const hollowDrawings = (modelObject) => {
+    const outerMesh = intersectDrawings(modelObject)
+    const stampMesh = outerMesh.clone('stamp')
+    const outerCSG = CSG.FromMesh(outerMesh)
+    stampMesh.scaling = new Vector3(1, 1, 1)
+    stampMesh.position = new Vector3(0, -0.025, 0)
+    const stampCSG = CSG.FromMesh(stampMesh)
+    outerCSG.subtractInPlace(stampCSG)
+    const resultMesh = outerCSG.toMesh('Result-Mesh', outerMesh.material, null, true)
+    outerMesh.dispose()
+    stampMesh.dispose()
+    return resultMesh
+}
+
 const blockMesh = (modelObject, solutionParticles, scene) => {
     // Convert the object points to binary
     const { size, blocks, pickable } = modelObject
@@ -200,5 +214,5 @@ const textPanelMesh = (text, scene) => {
 }
 
 export {
-    intersectDrawings, createColorMaterial, blockMesh, textPanelMesh
+    intersectDrawings, hollowDrawings, createColorMaterial, blockMesh, textPanelMesh
 }

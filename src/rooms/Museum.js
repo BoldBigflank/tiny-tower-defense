@@ -1,9 +1,9 @@
-import { createColorMaterial } from '../utils/meshGenerator'
-import { catBlock, shipBlock, squiggleBlock, skullBlock } from '../content/models.js'
+import { createColorMaterial, hollowDrawings } from '../utils/meshGenerator'
+import { catBlock, shipBlock, squiggleBlock, skullBlock, building1, building3 } from '../content/models.js'
 import * as SculpturesStation from './Sculptures'
 
 const {
-    Color3, Vector3, HemisphericLight, PointLight, StandardMaterial, MeshBuilder, TransformNode, WebXRState
+    Color3, CSG, Vector3, HemisphericLight, PointLight, StandardMaterial, MeshBuilder, TransformNode, WebXRState
 } = BABYLON
 
 export async function setup(ctx) {
@@ -17,6 +17,33 @@ export async function setup(ctx) {
     light1.groundColor = new Color3(0, 0, 0)
     const light2 = new PointLight('light2', new Vector3(0, 25, -1), scene)
     light2.intensity = 0.3
+
+    // The buildings
+    const bubbleMesh = MeshBuilder.CreateSphere('Sphere', { segments: 8 }, scene)
+    const bubbleStamp = bubbleMesh.clone('Bubble-Stamp')
+    const bubbleCSG = CSG.FromMesh(bubbleMesh)
+    bubbleStamp.position.x = 0.5
+    bubbleCSG.unionInPlace(CSG.FromMesh(bubbleStamp))
+    bubbleStamp.position.x = -.5
+    bubbleCSG.unionInPlace(CSG.FromMesh(bubbleStamp))
+    const solidMesh = bubbleCSG.toMesh('Solid')
+    solidMesh.scaling = new Vector3 (0.99, 0.99, 0.99)
+    bubbleCSG.subtractInPlace(CSG.FromMesh(solidMesh))
+    
+    const buildingMesh = bubbleCSG.toMesh('Building')
+    buildingMesh.scaling = new Vector3(20, 12, 20)
+    // buildingMesh.position.y = 2.5
+    scene.addMesh(buildingMesh)
+    bubbleMesh.dispose()
+    bubbleStamp.dispose()
+    solidMesh.dispose()
+
+    // const building1Mesh = hollowDrawings(building3)
+    // building1Mesh.scaling = new Vector3(10, 10, 10)
+    // building1Mesh.position.y = 5
+    // building1Mesh.position.z = 5
+    // scene.addMesh(building1Mesh)
+
 
     // Ground
     const oceanColor = new Color3(0.004, 0.608, 0.991)

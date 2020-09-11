@@ -1,4 +1,4 @@
-import { colorNME } from '../shaders/colorNME'
+import { colorNME, colorNMEColors } from '../shaders/colorNME'
 import { addErasable, addSPSEvents, addGrabbable } from '../utils/behaviors'
 import { blockMesh, textPanelMesh, createColorMaterial } from '../utils/meshGenerator'
 import { blankBlock } from '../content/models'
@@ -20,8 +20,16 @@ const humanReadableTimer = (time) => {
 
 export async function setup(blockObject, ctx) {
     const redColorMaterial = createColorMaterial(new Color3(1.0, 0, 0))
-    const colorMaterial = colorNME()
-
+    let colorMaterial
+    if (blockObject.colors) {
+        const colors = blockObject.colors.map((color) => {
+            const colorArray = color.split(',')
+            return new Color3.FromInts(colorArray[0], colorArray[1], colorArray[2])
+        })
+        colorMaterial = colorNMEColors(colors)
+    } else {
+        colorMaterial = colorNME()
+    } 
     const myStorage = new Storage()
     const { scene, engine } = ctx
     // * The parent mesh
@@ -67,7 +75,7 @@ export async function setup(blockObject, ctx) {
 
     // * The solution
     const solutionMesh = blockMesh(blockObject, null, scene)
-    solutionMesh.metadata.sps.setMultiMaterial([colorNME(), redColorMaterial])
+    solutionMesh.metadata.sps.setMultiMaterial([colorMaterial, redColorMaterial])
     // solutionMesh.material = colorNME()
     solutionMesh.position = new Vector3(-1, 1.5, 0)
     solutionMesh.scaling = new Vector3(0.5, 0.5, 0.5)
@@ -87,7 +95,7 @@ export async function setup(blockObject, ctx) {
 
     // The blank canvas
     const mesh = blockMesh(blankBlock, solutionMesh.metadata.sps.particles, scene)
-    mesh.metadata.sps.setMultiMaterial([colorMaterial, redColorMaterial, redColorMaterial])
+    mesh.metadata.sps.setMultiMaterial([colorMaterial, redColorMaterial])
     // If there's one stored in localstorage, do that one
     if (myStorage.isSupported) {
         const particleString = myStorage.get(parentMesh.name)

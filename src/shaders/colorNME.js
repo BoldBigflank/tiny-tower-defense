@@ -1,6 +1,17 @@
 /* eslint-disable no-undef */
 // Taken from https://nme.babylonjs.com/#VJUZ7I#2
-const colorNME = function() {
+
+const steps = [0.0625, 0.1875, 0.3125, 0.4375, 0.5625, 0.6875, 0.8125, 0.9375]
+const defaultColors = [
+    new BABYLON.Color3(0.019, 0.019, 0.423),
+    new BABYLON.Color3(0.047058823529411764, 0.6549019607843137, 0.8274509803921568),
+    new BABYLON.Color3(0.8313725490196079, 0.7215686274509804, 0.5254901960784314),
+    new BABYLON.Color3(0.0196078431372549, 0.47843137254901963, 0.16470588235294117),
+    new BABYLON.Color3(0.3058823529411765, 0.22745098039215686, 0.13333333333333333),
+    new BABYLON.Color3(0.5450980392156862, 0.3411764705882353, 0.16470588235294117),
+    new BABYLON.Color3(1, 1, 1)
+]
+const colorNMEColors = function(colors) {
     const nodeMaterial = new BABYLON.NodeMaterial('node')
 
     // InputBlock
@@ -41,13 +52,12 @@ const colorNME = function() {
 
     // GradientBlock
     const Gradient = new BABYLON.GradientBlock('Gradient')
-    Gradient.colorSteps.push(new BABYLON.GradientBlockColorStep(0, new BABYLON.Color3(0.0196078431372549, 0.0196078431372549, 0.4235294117647059)))
-    Gradient.colorSteps.push(new BABYLON.GradientBlockColorStep(0.22, new BABYLON.Color3(0.047058823529411764, 0.6549019607843137, 0.8274509803921568)))
-    Gradient.colorSteps.push(new BABYLON.GradientBlockColorStep(0.35, new BABYLON.Color3(0.8313725490196079, 0.7215686274509804, 0.5254901960784314)))
-    Gradient.colorSteps.push(new BABYLON.GradientBlockColorStep(0.52, new BABYLON.Color3(0.0196078431372549, 0.47843137254901963, 0.16470588235294117)))
-    Gradient.colorSteps.push(new BABYLON.GradientBlockColorStep(0.61, new BABYLON.Color3(0.3058823529411765, 0.22745098039215686, 0.13333333333333333)))
-    Gradient.colorSteps.push(new BABYLON.GradientBlockColorStep(0.86, new BABYLON.Color3(0.5450980392156862, 0.3411764705882353, 0.16470588235294117)))
-    Gradient.colorSteps.push(new BABYLON.GradientBlockColorStep(1, new BABYLON.Color3(1, 1, 1)))
+    Gradient.colorSteps.push(new BABYLON.GradientBlockColorStep(0, colors[0]))
+    for (let i = 0; i < steps.length; i++) {
+        let color = (i >= colors.length) ? colors[colors.length-1] : colors[i]
+        Gradient.colorSteps.push(new BABYLON.GradientBlockColorStep(steps[i], color))
+    }
+    Gradient.colorSteps.push(new BABYLON.GradientBlockColorStep(1, colors[colors.length-1]))
 
     // FragmentOutputBlock
     const FragmentOutput = new BABYLON.FragmentOutputBlock('FragmentOutput')
@@ -72,4 +82,9 @@ const colorNME = function() {
     nodeMaterial.build()
     return nodeMaterial
 }
-export { colorNME }
+
+const colorNME = function () {
+    return colorNMEColors(defaultColors)
+}
+
+export { colorNME, colorNMEColors }
