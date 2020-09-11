@@ -1,6 +1,6 @@
 import { colorNME, colorNMEColors } from '../shaders/colorNME'
 import { addErasable, addSPSEvents, addGrabbable } from '../utils/behaviors'
-import { blockMesh, textPanelMesh, createColorMaterial } from '../utils/meshGenerator'
+import { blockMesh, textPanelMesh, createColorMaterial, startButtonMesh } from '../utils/meshGenerator'
 import { blankBlock } from '../content/models'
 import constants from '../utils/constants'
 import { Storage } from '../utils/Storage'
@@ -175,10 +175,16 @@ export async function setup(blockObject, ctx) {
     // TODO: Turn left/right buttons
 
     // Start/reset button
-    const startButton = MeshBuilder.CreateBox('Start-Button', { size: 0.25 }, scene)
-    startButton.position = new Vector3(0, 0.25, -0.25)
+    const startButton = startButtonMesh(scene)
+    // const startButton = MeshBuilder.CreateBox('Start-Button', { size: 0.25 }, scene)
+    startButton.position = new Vector3(0, 0.25, -0.10)
     startButton.startInteraction = () => {
         parentMesh.startGame()
+        startButton.scaling = new Vector3(0.9, 0.9, 1)
+        startButton.setState('start')
+    }
+    startButton.endInteraction = () => {
+        startButton.scaling = Vector3.One()
     }
 
     // Put it all together

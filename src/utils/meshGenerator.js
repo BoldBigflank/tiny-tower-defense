@@ -170,6 +170,44 @@ const blockMesh = (modelObject, solutionParticles, scene) => {
     return sculptureMesh
 }
 
+const canvasMesh = (boxSize, textureSize, scene) => {
+    const mesh = MeshBuilder.CreateBox('Start-Button', { size: boxSize }, scene)
+    const texture = new DynamicTexture('TextTexture', { width: textureSize, height: textureSize }, scene)
+    const material = new StandardMaterial('TextMaterial', scene)
+    material.diffuseTexture = texture
+    material.diffuseTexture.hasAlpha = true
+    mesh.material = material
+    return mesh
+}
+
+const startButtonMesh = (scene) => {
+    const size = 512
+    const mesh = canvasMesh(0.25, size)
+    const { material } = mesh
+    const texture = material.diffuseTexture
+    const context = texture.getContext()
+    context.fillStyle = 'green'
+    context.fillRect(0, 0, size, size)
+    context.save()
+    context.lineWidth = size / 8
+    context.lineCap = 'round'
+    context.translate(0.5 * size, 0.5 * size)
+    // first point
+    context.beginPath()
+    let distance = 0.25 * size
+    let angle = 0
+    context.moveTo(distance * Math.cos(angle), distance * Math.sin(angle))
+    angle = 2 / 3 * Math.PI
+    context.lineTo(distance * Math.cos(angle), distance * Math.sin(angle))
+    angle = 4 / 3 * Math.PI
+    context.lineTo(distance * Math.cos(angle), distance * Math.sin(angle))
+    context.closePath()
+    context.stroke()
+    context.restore()
+    texture.update()
+    return mesh
+}
+
 const textPanelMesh = (text, scene) => {
     const panelWidth = 512
     const panelHeight = 341
@@ -214,5 +252,5 @@ const textPanelMesh = (text, scene) => {
 }
 
 export {
-    intersectDrawings, hollowDrawings, createColorMaterial, blockMesh, textPanelMesh
+    intersectDrawings, hollowDrawings, createColorMaterial, blockMesh, textPanelMesh, startButtonMesh
 }

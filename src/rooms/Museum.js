@@ -1,5 +1,5 @@
-import { createColorMaterial, hollowDrawings } from '../utils/meshGenerator'
-import { catBlock, shipBlock, squiggleBlock, skullBlock, building1, building3 } from '../content/models.js'
+import { blockMesh, createColorMaterial, hollowDrawings } from '../utils/meshGenerator'
+import { catBlock, shipBlock, squiggleBlock, skullBlock, building1, building3, fourBlock } from '../content/models.js'
 import * as SculpturesStation from './Sculptures'
 
 const {
@@ -18,33 +18,28 @@ export async function setup(ctx) {
     const light2 = new PointLight('light2', new Vector3(0, 25, -1), scene)
     light2.intensity = 0.3
 
-    // The buildings
-    const bubbleMesh = MeshBuilder.CreateSphere('Sphere', { segments: 8 }, scene)
-    const bubbleStamp = bubbleMesh.clone('Bubble-Stamp')
-    const bubbleCSG = CSG.FromMesh(bubbleMesh)
-    bubbleStamp.position.x = 0.5
-    bubbleCSG.unionInPlace(CSG.FromMesh(bubbleStamp))
-    bubbleStamp.position.x = -.5
-    bubbleCSG.unionInPlace(CSG.FromMesh(bubbleStamp))
-    const solidMesh = bubbleCSG.toMesh('Solid')
-    solidMesh.scaling = new Vector3 (0.99, 0.99, 0.99)
-    bubbleCSG.subtractInPlace(CSG.FromMesh(solidMesh))
+    // // The buildings
+    // const bubbleMesh = MeshBuilder.CreateSphere('Sphere', { segments: 8 }, scene)
+    // const bubbleStamp = bubbleMesh.clone('Bubble-Stamp')
+    // const bubbleCSG = CSG.FromMesh(bubbleMesh)
+    // bubbleStamp.position.x = 0.5
+    // bubbleCSG.unionInPlace(CSG.FromMesh(bubbleStamp))
+    // bubbleStamp.position.x = -.5
+    // bubbleCSG.unionInPlace(CSG.FromMesh(bubbleStamp))
+    // const solidMesh = bubbleCSG.toMesh('Solid')
+    // solidMesh.scaling = new Vector3 (0.99, 0.99, 0.99)
+    // bubbleCSG.subtractInPlace(CSG.FromMesh(solidMesh))
     
-    const buildingMesh = bubbleCSG.toMesh('Building')
-    buildingMesh.scaling = new Vector3(20, 12, 20)
-    // buildingMesh.position.y = 2.5
-    scene.addMesh(buildingMesh)
-    bubbleMesh.dispose()
-    bubbleStamp.dispose()
-    solidMesh.dispose()
-
-    // const building1Mesh = hollowDrawings(building3)
-    // building1Mesh.scaling = new Vector3(10, 10, 10)
-    // building1Mesh.position.y = 5
-    // building1Mesh.position.z = 5
-    // scene.addMesh(building1Mesh)
-
-
+    // const buildingMesh = bubbleCSG.toMesh('Building')
+    // buildingMesh.scaling = new Vector3(20, 12, 20)
+    // // buildingMesh.position.y = 2.5
+    // scene.addMesh(buildingMesh)
+    // bubbleMesh.dispose()
+    // bubbleStamp.dispose()
+    // solidMesh.dispose()
+    // const buildingMesh = blockMesh(fourBlock, null, scene)
+    // buildingMesh.scaling = new Vector3(8, 8, 8)
+    // buildingMesh.position.y = 4
     // Ground
     const oceanColor = new Color3(0.004, 0.608, 0.991)
     const oceanMat = createColorMaterial(oceanColor)
