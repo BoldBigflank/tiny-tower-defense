@@ -95,7 +95,7 @@ const init = async () => {
                 tutMesh.scaling = new Vector3(0.25, 0.25, 0.25)
 
                 tutMesh.setParent(model.rootMesh)
-                tutMesh.position.y = .08
+                tutMesh.position.y = 0.08
             })
         })
     })
@@ -108,6 +108,9 @@ const init = async () => {
     xrHelper.onStateChangedObservable.add((state) => {
         if (state === WebXRState.IN_XR) {
             xrHelper.camera.ellipsoid = new Vector3(1, 1, 1)
+        }
+        if (state === WebXRState.NOT_IN_XR) {
+            camera.position.y = 2.01
         }
     })
 
@@ -173,6 +176,13 @@ const init = async () => {
         }
     }, PointerEventTypes.POINTERUP)
 
+    scene.registerBeforeRender(() => {
+        if (camera.position.y < 0) {
+            console.log('TOO LOW')
+            camera.position = new Vector3(0, 2.01, -2)
+        }
+    })
+
     // Load the Ship
     await roomMuseum.setup(context)
 
@@ -196,6 +206,6 @@ const init = async () => {
     })
 }
 window.addEventListener('DOMContentLoaded', () => {
-    var b = document.getElementById('playButton')
+    const b = document.getElementById('playButton')
     b.onclick = init
 })
