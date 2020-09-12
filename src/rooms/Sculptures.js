@@ -168,7 +168,7 @@ export async function setup(blockObject, ctx) {
                 text += `|${mistakes} ${(mistakes === 1) ? 'mistake' : 'mistakes'}`
             }
             // TODO: Count and display mistakes
-            infoPanel.updateText(text)
+            infoPanel.setText(text)
             counter = constants.percentUpdateFrames
         }
         parentMesh.metadata.timer = timer

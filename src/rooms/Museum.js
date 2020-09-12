@@ -103,7 +103,7 @@ export async function setup(ctx) {
     const storyTextMesh = textPanelMesh({ width: 1024, height: 500 }, scene)
     storyTextMesh.position = new Vector3(0, 4.5, 7.4)
     storyTextMesh.scaling = new Vector3(5, 5, 1)
-    storyTextMesh.updateText('Welcome speed sculptors!|Complete each sculpture in|4:04 without any mistakes|to earn a high score')
+    storyTextMesh.setText('Welcome speed sculptors!|Complete each sculpture in|4:04 without any mistakes|to earn a high score')
 }
 
 export function enter(ctx) {

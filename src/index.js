@@ -1,5 +1,6 @@
 import './style.scss'
 import * as roomMuseum from './rooms/Museum.js'
+import { textPanelMesh } from './utils/meshGenerator'
 
 const {
     Scene, Color3, Vector3, UniversalCamera, DynamicTexture, StandardMaterial, MeshBuilder, PointerEventTypes, WebXRState
@@ -25,11 +26,10 @@ const init = async () => {
     scene.gravity = new Vector3(0, -1.81, 0)
     scene.collisionsEnabled = true
     context.scene = scene
-    
-    // // Sky
-    // // Sky
-    // var stars = Mesh.CreateSphere('stars', 100, 1000, scene)
-    // stars.material = materialSky
+
+    // const debugPanel = textPanelMesh({width: 1024, height: 512}, scene)
+    // debugPanel.position = new Vector3(0, 2, 5)
+    // debugPanel.setText('')
 
     // Skybox
     const skybox = MeshBuilder.CreateSphere('skyBox', { diameter: 1000, segments: 100 }, scene)
@@ -86,7 +86,16 @@ const init = async () => {
                 })
             }
             motionController.onModelLoadedObservable.add((model) => {
+                console.log('onModelLoadedObservable', model)
                 // Attach stuff to the controllers if you want
+                const tutMesh = textPanelMesh({ width: 960, height: 341 }, scene)
+                tutMesh.name = 'Tutorial-Mesh'
+                tutMesh.setText('Press up on the joystick|to aim and teleport|to the pointer location')
+                tutMesh.rotate(Vector3.Right(), Math.PI / 4)
+                tutMesh.scaling = new Vector3(0.25, 0.25, 0.25)
+
+                tutMesh.setParent(model.rootMesh)
+                tutMesh.position.y = .08
             })
         })
     })
@@ -98,7 +107,7 @@ const init = async () => {
     context.xrHelper = xrHelper
     xrHelper.onStateChangedObservable.add((state) => {
         if (state === WebXRState.IN_XR) {
-            xrHelper.camera.ellipsoid = new Vector3(1,1,1)
+            xrHelper.camera.ellipsoid = new Vector3(1, 1, 1)
         }
     })
 
@@ -107,11 +116,18 @@ const init = async () => {
         // xrCamera.onBeforeCameraTeleport as well
         xrCamera.onAfterCameraTeleport.add((pos) => {
             // This is the new position
-            console.log('got a new position')
+            // Remove the tutorial from any meshes
+            xrDefault.input.controllers.forEach((controller) => {
+                if (controller.motionController && controller.motionController.rootMesh) {
+                    controller.motionController.rootMesh.getChildMeshes(true).forEach((childMesh) => {
+                        if (childMesh.name === 'Tutorial-Mesh') {
+                            childMesh.dispose()
+                        }
+                    })
+                }
+            })
         })
-        if (xrCamera.onAfterCameraTeleport) { // JS13kGames lib doesn't have this?
-        }
-    });
+    })
 
     // Interactions
     context.selectedMeshes = {}

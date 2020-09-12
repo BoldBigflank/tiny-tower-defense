@@ -219,7 +219,12 @@ const textPanelMesh = (options, scene) => {
     material.diffuseTexture = texture
     material.diffuseTexture.hasAlpha = true
     mesh.material = material
-    mesh.updateText = function(text) {
+    mesh.appendText = function(text) {
+        this.text = `${text}|${this.text}`
+        this.setText(this.text)
+    }
+    mesh.setText = function(text) {
+        this.text = text
         const texture = this.material.diffuseTexture
         const context = texture.getContext()
         context.fillStyle = 'transparent'

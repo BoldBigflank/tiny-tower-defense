@@ -56,6 +56,7 @@ export function addSPSEvents(model) {
             }
         },
         endInteraction(pointerInfo, context) {
+            this.metadata.selectedParticles = this.metadata.selectedParticles || {}
             const particleMesh = this.metadata.selectedParticles[pointerInfo.event.pointerId]
             const sps = this.metadata.sps
             if (particleMesh && particleMesh.endInteraction) {
