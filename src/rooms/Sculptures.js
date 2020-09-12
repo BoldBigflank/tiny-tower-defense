@@ -40,10 +40,11 @@ export async function setup(blockObject, ctx) {
     parentMesh.metadata = {
         inProgress: false,
         timer: 0,
-        counter: 0
+        counter: 0,
+        myStorage: myStorage
     }
     parentMesh.startGame = function() {
-        const { sculpture, solution } = this.metadata
+        const { sculpture, solution, myStorage } = this.metadata
         const sps = sculpture.metadata.sps
         for (let i = 0; i < sps.nbParticles; i++) {
             const particle = sps.particles[i]
@@ -56,10 +57,36 @@ export async function setup(blockObject, ctx) {
         this.metadata.inProgress = true
         this.metadata.timer = constants.maxTime
         solution.parent.scaling = Vector3.One()
+
+        if (this.name !== "Cat") return
+        this.getChildMeshes(true).forEach((child) => {
+            if (child.name === "Tutorial-Mesh") child.dispose()
+            if (child.name === "Tutorial-Lines") child.dispose()
+        })
+        if (myStorage.isSupported && !myStorage.get('Cat')) {
+            const tutorialMesh = textPanelMesh({ width: 960 }, scene)
+            tutorialMesh.setParent(parentMesh)
+            tutorialMesh.setText('Aim the laser at the|sculpture and click|to chip away blocks')
+            tutorialMesh.position = new Vector3(-1, 1, -0.5)
+            tutorialMesh.name = 'Tutorial-Mesh'
+            tutorialMesh.billboardMode = Mesh.BILLBOARDMODE_Y
+            const lines = MeshBuilder.CreateLines('Tutorial-Lines2', {
+                points: [
+                    new Vector3(-1, 1.15, -0.5),
+                    new Vector3(-0.25, 1.25, -0.2)
+                ],
+                colors: [
+                    new BABYLON.Color4(0, 0, 0, 1),
+                    new BABYLON.Color4(0, 0, 0, 1)
+                ],
+                useVertexAlpha: false
+            }, scene)
+            lines.locallyTranslate(parentMesh.position)
+            lines.setParent(parentMesh)
+        }
     }
     parentMesh.endGame = function() {
         this.metadata.inProgress = false
-        // TODO: Save the particles to localstorage
         const { sculpture, solution } = this.metadata
         const sps = sculpture.metadata.sps
         const particleExport = []
@@ -126,7 +153,6 @@ export async function setup(blockObject, ctx) {
     addSPSEvents(mesh)
     mesh.metadata.parent = parentMesh
     const sps = mesh.metadata.sps
-    // TODO: Load the stored particles from localStorage
     for (let i = 0; i < sps.nbParticles; i++) {
         const particle = sps.particles[i]
         addErasable(particle)
@@ -167,7 +193,6 @@ export async function setup(blockObject, ctx) {
             if (mistakes) {
                 text += `|${mistakes} ${(mistakes === 1) ? 'mistake' : 'mistakes'}`
             }
-            // TODO: Count and display mistakes
             infoPanel.setText(text)
             counter = constants.percentUpdateFrames
         }
@@ -175,7 +200,6 @@ export async function setup(blockObject, ctx) {
         parentMesh.metadata.counter = counter
     })
     infoPanel.setParent(baseMesh)
-
 
     // Buttons
     // TODO: Turn left/right buttons
@@ -193,8 +217,28 @@ export async function setup(blockObject, ctx) {
     }
     startButton.setParent(baseMesh)
 
-
-    if (blockObject.name === 'Skull') {
+    console.log(myStorage.get('Cat'))
+    if (blockObject.name === 'Cat' && myStorage && !myStorage.get('Cat')) {
+        // Add tutorial textMeshes
+        const tutorialMesh = textPanelMesh({ width: 960 }, scene)
+        tutorialMesh.setText('Aim the laser and |click the trigger|to reset and start timer')
+        tutorialMesh.position = new Vector3(1, 1, -0.5)
+        tutorialMesh.name = 'Tutorial-Mesh'
+        tutorialMesh.billboardMode = Mesh.BILLBOARDMODE_Y
+        const lines = MeshBuilder.CreateLines('Tutorial-Lines', {
+            points: [
+                tutorialMesh.position,
+                new Vector3(0, 0.25, -0.2)
+            ],
+            colors: [
+                new BABYLON.Color4(0,0,0,1),
+                new BABYLON.Color4(0,0,0,1)
+            ],
+            useVertexAlpha: false
+        }, scene)
+        lines.setParent(parentMesh)
+        tutorialMesh.setParent(parentMesh)
+    } else if (blockObject.name === 'Skull') {
         mesh.scaling = new Vector3(2.2, 2.2, 2.2)
         mesh.position = new Vector3(0, 0.88, 3)
         baseMesh.position.x = -2

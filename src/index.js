@@ -69,24 +69,22 @@ const init = async () => {
     xrDefault.input.onControllerAddedObservable.add((xrInput) => {
         xrInput.onMotionControllerInitObservable.add((motionController) => {
             // Watch for trigger events
-            console.log(motionController.getComponentIds())
             const mainComponent = motionController.getMainComponent()
-            console.log(mainComponent)
             if (mainComponent.isButton()) {
-                console.log('its a button')
+                // console.log('its a button')
                 mainComponent.onButtonStateChangedObservable.add((component) => {
-                    console.log('button pressed', component.value)
+                    // console.log('button pressed', component.value)
                     context.mainComponentActive = (component.value === 1)
                 })
             } else if (mainComponent.isAxes()) {
-                console.log('its an axes')
+                // console.log('its an axes')
                 mainComponent.onAxisValueChangedObservable.add((values) => {
-                    console.log('axis changed', values.x, values.y)
+                    // console.log('axis changed', values.x, values.y)
                     context.mainComponentActive = (values.x === 1 || values.y === 1)
                 })
             }
             motionController.onModelLoadedObservable.add((model) => {
-                console.log('onModelLoadedObservable', model)
+                // console.log('onModelLoadedObservable', model)
                 // Attach stuff to the controllers if you want
                 const tutMesh = textPanelMesh({ width: 960, height: 341 }, scene)
                 tutMesh.name = 'Tutorial-Mesh'
@@ -112,7 +110,7 @@ const init = async () => {
     })
 
     xrHelper.onInitialXRPoseSetObservable.add((xrCamera) => {
-        console.log('xrHelper onInitialXRPoseSetObservable')
+        // console.log('xrHelper onInitialXRPoseSetObservable')
         // xrCamera.onBeforeCameraTeleport as well
         xrCamera.onAfterCameraTeleport.add((pos) => {
             // This is the new position
