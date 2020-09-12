@@ -29,9 +29,10 @@ const init = async () => {
     scene.collisionsEnabled = true
     context.scene = scene
 
-    // const debugPanel = textPanelMesh({width: 1024, height: 512}, scene)
+    // const debugPanel = textPanelMesh({ width: 1440, height: 1024 }, scene)
     // debugPanel.position = new Vector3(0, 2, 5)
     // debugPanel.setText('')
+    // context.debugPanel = debugPanel
 
     // Skybox
     const skybox = MeshBuilder.CreateSphere('skyBox', { diameter: 1000, segments: 100 }, scene)

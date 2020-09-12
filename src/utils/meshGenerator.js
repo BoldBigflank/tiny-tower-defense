@@ -126,7 +126,7 @@ const blockMesh = (modelObject, solutionParticles, scene) => {
     const BOX_SIZE = 1 / WIDTH
     // Make a SPS
     // First create the SPS
-    const SPS = new SolidParticleSystem('SPS', scene, { 
+    const SPS = new SolidParticleSystem(`${modelObject.name}-SPS`, scene, { 
         isPickable: pickable,
         useModelMaterial: true
     })

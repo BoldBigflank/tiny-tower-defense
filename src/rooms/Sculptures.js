@@ -34,7 +34,7 @@ export async function setup(blockObject, ctx) {
         colorMaterial = colorNME()
     }
     const myStorage = new Storage()
-    const { scene, engine } = ctx
+    const { scene, engine, xrHelper, xrDefault } = ctx
     // * The parent mesh
     const parentMesh = new Mesh(blockObject.name, scene)
     parentMesh.metadata = {
@@ -58,6 +58,26 @@ export async function setup(blockObject, ctx) {
         this.metadata.timer = constants.maxTime
         solution.parent.scaling = Vector3.One()
 
+        // Attach the solution mesh to any motion controller
+        xrDefault.input.controllers.forEach((controller) => {
+            if (controller.motionController && controller.motionController.rootMesh) {
+                // Remove old solution boxes
+                controller.motionController.rootMesh.getChildMeshes(true).forEach((child) => {
+                    if (child.name.includes('Solution-Box')) {
+                        child.scaling = Vector3.Zero()
+                        child.setParent(null)
+                    }
+                })
+
+                const solutionBox = scene.getMeshByName(`${blockObject.name}-Solution-Box`)
+                solutionBox.scaling = new Vector3(0.25, 0.25, 0.25)
+                solutionBox.setParent(controller.motionController.rootMesh)
+                solutionBox.position = new Vector3(0, 0.1, 0)
+                solutionBox.rotation = new Vector3(Math.PI / 4, Math.PI, 0)
+            }
+        })
+
+        // CAT ONLY STUFF BEWARE
         if (this.name !== "Cat") return
         this.getChildMeshes(true).forEach((child) => {
             if (child.name === "Tutorial-Mesh") child.dispose()
@@ -111,17 +131,17 @@ export async function setup(blockObject, ctx) {
     solutionMesh.scaling = new Vector3(0.5, 0.5, 0.5)
     parentMesh.metadata.solution = solutionMesh
     // The solution's box
-    const box = MeshBuilder.CreateBox('Helper-Box', { size: 0.51 }, scene)
-    box.position = new Vector3(-1, 1.5, 0)
-    box.material = new StandardMaterial('box')
-    box.material.alpha = 0.5
+    const solutionBox = MeshBuilder.CreateBox(`${blockObject.name}-Solution-Box`, { size: 0.51 }, scene)
+    solutionBox.position = new Vector3(-1, 1.5, 0)
+    solutionBox.material = new StandardMaterial('box')
+    solutionBox.material.alpha = 0.5
 
-    const box2 = box.clone('Helper-Box2')
-    box2.isPickable = false
-    box2.position.x = 0
+    const helperBox = solutionBox.clone(`${blockObject.name}-Helper-Box`)
+    helperBox.isPickable = false
+    helperBox.position.x = 0
 
-    solutionMesh.setParent(box)
-    addGrabbable(box)
+    solutionMesh.setParent(solutionBox)
+    // addGrabbable(solutionBox)
 
     // The blank canvas
     const mesh = blockMesh(blankBlock, solutionMesh.metadata.sps.particles, scene)
@@ -247,26 +267,26 @@ export async function setup(blockObject, ctx) {
         mesh.scaling = new Vector3(2.2, 2.2, 2.2)
         mesh.position = new Vector3(0, 0.88, 3)
         baseMesh.position.x = -2
-        box.position.x = -2
-        box2.dispose()
+        solutionBox.position.x = -2
+        helperBox.dispose()
     } else if (blockObject.name === 'Ship') {
         mesh.scaling = new Vector3(8, 8, 8)
         mesh.position = new Vector3(0, 4, 8)
         baseMesh.position.x = -2
-        box.position.x = -2
-        box2.dispose()
+        solutionBox.position.x = -2
+        helperBox.dispose()
     } else if (blockObject.name === 'Links') {
         mesh.scaling = new Vector3(2.2, 2.2, 2.2)
         mesh.position = new Vector3(0, 0.88, 3)
         baseMesh.position.x = -2
-        box.position.x = -2
-        box2.dispose()
+        solutionBox.position.x = -2
+        helperBox.dispose()
     }
 
     // Put it all together
     baseMesh.setParent(parentMesh)
-    box.setParent(parentMesh)
-    box2.setParent(parentMesh)
+    solutionBox.setParent(parentMesh)
+    helperBox.setParent(parentMesh)
     mesh.setParent(parentMesh)
     // Might want to move this up a level
     return parentMesh
