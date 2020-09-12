@@ -208,10 +208,10 @@ const startButtonMesh = (scene) => {
     return mesh
 }
 
-const textPanelMesh = (text, scene) => {
-    const panelWidth = 512
-    const panelHeight = 341
-    const mesh = MeshBuilder.CreatePlane('TextMesh', { width: 1, height: 2 / 3 }, scene)
+const textPanelMesh = (options, scene) => {
+    const panelWidth = options.width || 512
+    const panelHeight = options.height || 341
+    const mesh = MeshBuilder.CreatePlane('TextMesh', { width: 1, height: panelHeight / panelWidth }, scene)
 
     const borderRadius = 64
     const texture = new DynamicTexture('TextTexture', { width: panelWidth, height: panelHeight }, scene)
@@ -246,8 +246,6 @@ const textPanelMesh = (text, scene) => {
         })
         texture.update()
     }
-    mesh.rotate(Vector3.Right(), Math.PI / 8)
-    mesh.updateText(text)
     return mesh
 }
 

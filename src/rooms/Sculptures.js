@@ -134,7 +134,8 @@ export async function setup(blockObject, ctx) {
     sps.setParticles()
 
     // Info Panel
-    const infoPanel = textPanelMesh('Hello', scene)
+    const infoPanel = textPanelMesh({}, scene)
+    infoPanel.rotate(Vector3.Right(), Math.PI / 8)
     infoPanel.position = new Vector3(0, 1, -0.3)
     infoPanel.scaling = new Vector3(0.7, 0.7, 0.7)
     scene.registerBeforeRender(() => {
