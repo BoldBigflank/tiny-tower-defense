@@ -223,7 +223,6 @@ export async function setup(blockObject, ctx) {
     }
     startButton.setParent(baseMesh)
 
-    console.log(myStorage.get('Cat'))
     if (blockObject.name === 'Cat' && myStorage && !myStorage.get('Cat')) {
         // Add tutorial textMeshes
         const tutorialMesh = textPanelMesh({ width: 960 }, scene)
@@ -253,6 +252,12 @@ export async function setup(blockObject, ctx) {
     } else if (blockObject.name === 'Ship') {
         mesh.scaling = new Vector3(8, 8, 8)
         mesh.position = new Vector3(0, 4, 8)
+        baseMesh.position.x = -2
+        box.position.x = -2
+        box2.dispose()
+    } else if (blockObject.name === 'Links') {
+        mesh.scaling = new Vector3(2.2, 2.2, 2.2)
+        mesh.position = new Vector3(0, 0.88, 3)
         baseMesh.position.x = -2
         box.position.x = -2
         box2.dispose()

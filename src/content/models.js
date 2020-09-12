@@ -86,8 +86,19 @@ const skullBlock = {
     ]
 }
 
+const linksBlock = { "name": "Links", "size": [8, 8, 8], colors: [
+    '83,52,25',
+    '164,82,9',
+    '255,102,0',
+    '83,52,25',
+    '255,204,51',
+    '255,102,0',
+    '164,82,9',
+    '255,204,51'
+], "blocks": ["0001100000011000000110001111111111111111000110000001100000011000", "0111000011011000100010001001111110011111100010001101100001110000", "0000111000011011000100011111100111111001000100010001101100001110"] }
+
 const fourBlock = { "size": [8, 8, 8], "color": "1,1,1", "blocks": ["1111111101101101101110101111111111010101000000000000000000000000", "0000100100001001111110011000000111000000011000010011000100011111", "1111111101011101101110101111111111011001000000000000000000000000"] }
 
 export {
-    cabinWalls, cabinFloor, desk, wave, shipBack, shipDeck, shipFront, cat, catBlock, blankBlock, shipBlock, squiggleBlock, skullBlock, building1, building3, fourBlock
+    cabinWalls, cabinFloor, desk, wave, shipBack, shipDeck, shipFront, cat, catBlock, blankBlock, shipBlock, squiggleBlock, skullBlock, building1, building3, fourBlock, linksBlock
 }

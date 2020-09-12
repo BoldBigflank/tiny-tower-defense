@@ -2,7 +2,7 @@ import {
     blockMesh, createColorMaterial, hollowDrawings, textPanelMesh
 } from '../utils/meshGenerator'
 import {
-    catBlock, shipBlock, squiggleBlock, skullBlock, building1, building3, fourBlock
+    catBlock, shipBlock, squiggleBlock, skullBlock, linksBlock
 } from '../content/models'
 import * as Canon from '../content/canon.js'
 import * as SculpturesStation from './Sculptures'
@@ -99,6 +99,10 @@ export async function setup(ctx) {
     const skullSculpture = await SculpturesStation.setup(skullBlock, ctx)
     skullSculpture.position = new Vector3(0, 0, 20)
 
+    const linksSculpture = await SculpturesStation.setup(linksBlock, ctx)
+    linksSculpture.position = new Vector3(15, 0, 5)
+    linksSculpture.rotate(Vector3.Up(), Math.PI / 2)
+
     WavesStation.setup(ctx)
 
     // Story board
@@ -110,6 +114,7 @@ export async function setup(ctx) {
     if (this.playing) return
     let mySongData = zzfxM(...Canon.song)
     let myAudioNode = zzfxP(...mySongData)
+    myAudioNode.loop = true
     this.playing = true
 }
 
