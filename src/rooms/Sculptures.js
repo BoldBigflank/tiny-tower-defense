@@ -1,6 +1,9 @@
+/* eslint-disable complexity */
 import { colorNME, colorNMEColors } from '../shaders/colorNME'
 import { addErasable, addSPSEvents, addGrabbable } from '../utils/behaviors'
-import { blockMesh, textPanelMesh, createColorMaterial, startButtonMesh } from '../utils/meshGenerator'
+import {
+    blockMesh, textPanelMesh, createColorMaterial, startButtonMesh
+} from '../utils/meshGenerator'
 import { blankBlock } from '../content/models'
 import constants from '../utils/constants'
 import { Storage } from '../utils/Storage'
@@ -29,7 +32,7 @@ export async function setup(blockObject, ctx) {
         colorMaterial = colorNMEColors(colors)
     } else {
         colorMaterial = colorNME()
-    } 
+    }
     const myStorage = new Storage()
     const { scene, engine } = ctx
     // * The parent mesh
@@ -69,9 +72,9 @@ export async function setup(blockObject, ctx) {
         solution.parent.scaling = Vector3.Zero()
     }
     // * Base
-    const baseMesh = MeshBuilder.CreateBox('Pedestal', { height: 1.25, width: 0.4, depth: 0.4 }, scene)
+    const baseMesh = MeshBuilder.CreateBox('Pedestal', { height: 1.3, width: 0.4, depth: 0.4 }, scene)
     baseMesh.checkCollisions = true
-    baseMesh.position = new Vector3(0, 1.25 / 2, 0)
+    baseMesh.position = new Vector3(0, 0.6, 0)
 
     // * The solution
     const solutionMesh = blockMesh(blockObject, null, scene)
@@ -85,11 +88,11 @@ export async function setup(blockObject, ctx) {
     box.position = new Vector3(-1, 1.5, 0)
     box.material = new StandardMaterial('box')
     box.material.alpha = 0.5
-    
+
     const box2 = box.clone('Helper-Box2')
     box2.isPickable = false
     box2.position.x = 0
-    
+
     solutionMesh.setParent(box)
     addGrabbable(box)
 
@@ -162,7 +165,7 @@ export async function setup(blockObject, ctx) {
             text += `|${Math.floor((correct / total) * 100)}%`
             if (mistakes) {
                 text += `|${mistakes} ${(mistakes === 1) ? 'mistake' : 'mistakes'}`
-            } 
+            }
             // TODO: Count and display mistakes
             infoPanel.updateText(text)
             counter = constants.percentUpdateFrames
@@ -170,6 +173,8 @@ export async function setup(blockObject, ctx) {
         parentMesh.metadata.timer = timer
         parentMesh.metadata.counter = counter
     })
+    infoPanel.setParent(baseMesh)
+
 
     // Buttons
     // TODO: Turn left/right buttons
@@ -181,19 +186,32 @@ export async function setup(blockObject, ctx) {
     startButton.startInteraction = () => {
         parentMesh.startGame()
         startButton.scaling = new Vector3(0.9, 0.9, 1)
-        startButton.setState('start')
     }
     startButton.endInteraction = () => {
         startButton.scaling = Vector3.One()
+    }
+    startButton.setParent(baseMesh)
+
+
+    if (blockObject.name === 'Skull') {
+        mesh.scaling = new Vector3(2.2, 2.2, 2.2)
+        mesh.position = new Vector3(0, 0.88, 3)
+        baseMesh.position.x = -2
+        box.position.x = -2
+        box2.dispose()
+    } else if (blockObject.name === 'Ship') {
+        mesh.scaling = new Vector3(8, 8, 8)
+        mesh.position = new Vector3(0, 4, 8)
+        baseMesh.position.x = -2
+        box.position.x = -2
+        box2.dispose()
     }
 
     // Put it all together
     baseMesh.setParent(parentMesh)
     box.setParent(parentMesh)
     box2.setParent(parentMesh)
-    infoPanel.setParent(parentMesh)
     mesh.setParent(parentMesh)
-    startButton.setParent(parentMesh)
     // Might want to move this up a level
     return parentMesh
 }

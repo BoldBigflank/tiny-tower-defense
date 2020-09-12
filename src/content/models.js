@@ -86,6 +86,8 @@ const skullBlock = {
     ]
 }
 
+const fourBlock = { "size": [8, 8, 8], "color": "1,1,1", "blocks": ["1111111101101101101110101111111111010101000000000000000000000000", "0000100100001001111110011000000111000000011000010011000100011111", "1111111101011101101110101111111111011001000000000000000000000000"] }
+
 export {
-    cabinWalls, cabinFloor, desk, wave, shipBack, shipDeck, shipFront, cat, catBlock, blankBlock, shipBlock, squiggleBlock, skullBlock, building1, building3
+    cabinWalls, cabinFloor, desk, wave, shipBack, shipDeck, shipFront, cat, catBlock, blankBlock, shipBlock, squiggleBlock, skullBlock, building1, building3, fourBlock
 }

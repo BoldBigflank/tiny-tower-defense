@@ -22,10 +22,10 @@ const init = async () => {
     const skyColor = new Color3(0.01, 0.824, 1)
     scene.ambientColor = skyColor
     scene.clearColor = new Color3(0.01, 0.824, 1)
-    scene.gravity = new Vector3(0, -9.81, 0)
+    scene.gravity = new Vector3(0, -1.81, 0)
     scene.collisionsEnabled = true
     context.scene = scene
-
+    
     // // Sky
     // // Sky
     // var stars = Mesh.CreateSphere('stars', 100, 1000, scene)
@@ -62,6 +62,7 @@ const init = async () => {
     camera.applyGravity = true
     camera.ellipsoid = new Vector3(1, 1, 1)
     camera.checkCollisions = true
+    camera.minZ = 0.5
 
     // XR start
     const xrDefault = await scene.createDefaultXRExperienceAsync() // WebXRDefaultExperience

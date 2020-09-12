@@ -8,7 +8,7 @@ const {
 const DegreesToRadians = (degrees) => degrees / 57.2958
 
 const startNewWave = function () {
-    const r = 50 * Math.random() + 10
+    const r = 50 * Math.random() + 20
     const a = Math.random() * 2 * Math.PI
     this.position = new Vector3(r * Math.cos(a), 0, r * Math.sin(a))
     this.getScene().beginAnimation(
@@ -54,14 +54,6 @@ export async function setup(ctx) {
         waveMeshClone.parent = ctx.ocean
 
         startNewWave.bind(waveMeshClone)()
-        // Move/rotate the wave to give the illusion of movement
-        scene.registerAfterRender(() => {
-            const dt = engine.getDeltaTime() / 1000
-            // New Position
-            waveMeshClone.position.z += ctx.sailing.speed * dt
-            // Turning rotation
-            waveMeshClone.rotateAround(ctx.sailing.position, Vector3.Up(), DegreesToRadians(ctx.sailing.rotation) * dt)
-        })
     }
     waveMesh.dispose()
 }
