@@ -3,9 +3,12 @@ import {
 } from '../utils/meshGenerator'
 import {
     catBlock, shipBlock, squiggleBlock, skullBlock, building1, building3, fourBlock
-} from '../content/models.js'
+} from '../content/models'
+import * as Canon from '../content/canon.js'
 import * as SculpturesStation from './Sculptures'
 import * as WavesStation from './Waves'
+import '../utils/zzfx'
+import '../utils/zzfxm.min'
 
 const {
     Color3, CSG, Vector3, HemisphericLight, PointLight, StandardMaterial, Mesh, MeshBuilder, TransformNode, WebXRState
@@ -84,7 +87,6 @@ export async function setup(ctx) {
 
     // The cat block puzzle
     const catSculpture = await SculpturesStation.setup(catBlock, ctx)
-    console.log(catSculpture)
     catSculpture.position = new Vector3(-3, 0, 5)
 
     const shipSculpture = await SculpturesStation.setup(shipBlock, ctx)
@@ -104,6 +106,11 @@ export async function setup(ctx) {
     storyTextMesh.position = new Vector3(0, 4.5, 7.4)
     storyTextMesh.scaling = new Vector3(5, 5, 1)
     storyTextMesh.setText('Welcome speed sculptors!|Complete each sculpture in|4:04 without any mistakes|to earn a high score')
+
+    if (this.playing) return
+    let mySongData = zzfxM(...Canon.song)
+    let myAudioNode = zzfxP(...mySongData)
+    this.playing = true
 }
 
 export function enter(ctx) {

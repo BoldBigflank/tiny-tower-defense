@@ -9,7 +9,9 @@ const {
 const context = {}
 
 const init = async () => {
+    document.getElementById('intro').style.display = 'none'
     const canvas = document.getElementById('renderCanvas')
+    canvas.style.display = 'block'
     const engine = new BABYLON.Engine(canvas, true)
     context.engine = engine
     // createScene function that creates and return the scene
@@ -193,4 +195,7 @@ const init = async () => {
         engine.resize()
     })
 }
-window.addEventListener('DOMContentLoaded', init)
+window.addEventListener('DOMContentLoaded', () => {
+    var b = document.getElementById('playButton')
+    b.onclick = init
+})

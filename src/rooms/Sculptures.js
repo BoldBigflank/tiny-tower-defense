@@ -189,12 +189,17 @@ export async function setup(blockObject, ctx) {
                     mistakes += 1
                 }
             }
-            text += `|${Math.floor((correct / total) * 100)}%`
+            const percent = Math.floor((correct / total) * 100)
+            text += `|${percent}%`
             if (mistakes) {
                 text += `|${mistakes} ${(mistakes === 1) ? 'mistake' : 'mistakes'}`
             }
             infoPanel.setText(text)
             counter = constants.percentUpdateFrames
+            if (percent === 100) {
+                zzfx(...[, , 597, .34, .22, .42, , .71, -5.2, , 9, .08, .2, , , , , .59, .09, .14]); // Powerup 42
+                parentMesh.endGame()
+            }
         }
         parentMesh.metadata.timer = timer
         parentMesh.metadata.counter = counter
@@ -211,6 +216,7 @@ export async function setup(blockObject, ctx) {
     startButton.startInteraction = () => {
         parentMesh.startGame()
         startButton.scaling = new Vector3(0.9, 0.9, 1)
+        zzfx(...[, , 239, .04, .09, .29, , .99, -0.9, , , , , , , .1, .05, .91, .08]); // Jump 31
     }
     startButton.endInteraction = () => {
         startButton.scaling = Vector3.One()
