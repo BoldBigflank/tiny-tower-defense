@@ -105,7 +105,7 @@ export async function setup(ctx) {
 
     const trampGame = await TrampStation.setup(ctx)
     trampGame.position.y = 6.2
-    
+    trampGame.rotation = new Vector3(0, Math.PI, 0)
 
     // Story board
     const storyTextMesh = textPanelMesh({ width: 1024, height: 500 }, scene)

@@ -30,7 +30,7 @@ export async function setup(ctx) {
         // jumperMesh.position.y = 0.625
         jumperMesh.velocity = 9.8
         jumperMesh.acceleration = -9.8
-        jumperMesh.rotationalVelocity = 1.5 * Math.PI
+        jumperMesh.rotationalVelocity = 2 * Math.PI
         jumperMesh.flips = 0
         jumperMesh.streak = 0
         jumperMesh.lastZ = 0
@@ -67,7 +67,7 @@ export async function setup(ctx) {
                     jumperMesh.startFalling()
                 } else {
                     jumperMesh.velocity = Math.max(Math.abs(jumperMesh.velocity), 9.8)
-                    if (jumperMesh.flips > 0) jumperMesh.velocity += 1
+                    if (jumperMesh.flips > 0) jumperMesh.velocity += 1.8
                     jumperMesh.streak = (jumperMesh.flips > 0) ? jumperMesh.streak + 1 : 0
                     if (jumperMesh.streak > jumperMesh.maxStreak) {
                         jumperMesh.maxStreak = jumperMesh.streak
@@ -97,13 +97,16 @@ export async function setup(ctx) {
     jumperHead.setParent(jumperMesh)
 
     const buttonMesh = MeshBuilder.CreateBox('Rotate-Button', { size: 0.50 }, scene)
+    buttonMesh.material = createColorMaterial(Color3.FromInts(86, 176, 0))
     buttonMesh.position = new Vector3(-1, 0.25, -1)
     buttonMesh.startInteraction = (pointerInfo, controllerMesh, ctx) => {
         jumperMesh.spinning = true
+        buttonMesh.scaling = new Vector3(0.9, 0.9, 0.9)
     }
 
     buttonMesh.endInteraction = () => {
         jumperMesh.spinning = false
+        buttonMesh.scaling = Vector3.One()
     }
     buttonMesh.setParent(parentMesh)
 
