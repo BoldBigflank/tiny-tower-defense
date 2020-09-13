@@ -36,6 +36,7 @@ export async function setup(ctx) {
         jumperMesh.lastZ = 0
     }
     jumperMesh.startFalling = function() {
+        zzfx(1, .05, 80, 0, .02, .39, 3, 1.35, 0, 0, 0, 0, 0, .2, 0, .1, 0, .99, .05, 0); // Hit 54
         jumperMesh.falling = 60
         const direction = (jumperMesh.up.y >= 0) ? 1 : -1
         jumperMesh.spinning = false
@@ -66,6 +67,10 @@ export async function setup(ctx) {
                 if (z < DegreesToRadians(-25) || z > DegreesToRadians(25)) {
                     jumperMesh.startFalling()
                 } else {
+                    if (jumperMesh.interacted) {
+                        zzfx(1, .05, 178, .05, 0, .11, 0, 1.14, 4.2, 3.5, 0, 0, 0, 0, 0, .1, 0, .76, .1, 0); // Jump 45
+                    }
+                    jumperMesh.position.y = trampMesh.position.y + 0.5
                     jumperMesh.velocity = Math.max(Math.abs(jumperMesh.velocity), 9.8)
                     if (jumperMesh.flips > 0) jumperMesh.velocity += 1.8
                     jumperMesh.streak = (jumperMesh.flips > 0) ? jumperMesh.streak + 1 : 0
@@ -101,6 +106,7 @@ export async function setup(ctx) {
     buttonMesh.position = new Vector3(-1, 0.25, -1)
     buttonMesh.startInteraction = (pointerInfo, controllerMesh, ctx) => {
         jumperMesh.spinning = true
+        jumperMesh.interacted = true
         buttonMesh.scaling = new Vector3(0.9, 0.9, 0.9)
     }
 
