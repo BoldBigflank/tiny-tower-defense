@@ -73,7 +73,7 @@ export async function setup(blockObject, ctx) {
                 const solutionBox = scene.getMeshByName(`${blockObject.name}-Solution-Box`)
                 solutionBox.scaling = new Vector3(0.25, 0.25, 0.25)
                 solutionBox.setParent(controller.motionController.rootMesh)
-                solutionBox.position = new Vector3(0, 0.1, 0)
+                solutionBox.position = new Vector3(0, 0.05, -0.05)
                 solutionBox.rotation = new Vector3(Math.PI / 4, Math.PI, 0)
             }
         })
@@ -156,6 +156,7 @@ export async function setup(blockObject, ctx) {
     parentMesh.metadata.solution = solutionMesh
     // The solution's box
     const solutionBox = MeshBuilder.CreateBox(`${blockObject.name}-Solution-Box`, { size: 0.51 }, scene)
+    solutionBox.isPickable = false
     solutionBox.position = new Vector3(-1, 1.5, 0)
     solutionBox.material = new StandardMaterial('box')
     solutionBox.material.alpha = 0.5
@@ -296,7 +297,7 @@ export async function setup(blockObject, ctx) {
         tutorialMesh.setParent(parentMesh)
     } else if (blockObject.name === 'Skull') {
         mesh.scaling = new Vector3(2.2, 2.2, 2.2)
-        mesh.position = new Vector3(0, 0.88, 3)
+        mesh.position = new Vector3(0, 1.1, 3)
         baseMesh.position.x = -2
         solutionBox.position.x = -2
         helperBox.dispose()

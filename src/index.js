@@ -2,6 +2,8 @@ import './style.scss'
 import * as roomMuseum from './rooms/Museum.js'
 import { textPanelMesh } from './utils/meshGenerator'
 import { Storage } from './utils/Storage'
+import './utils/zzfx'
+import './utils/zzfxm.min'
 
 const {
     Scene, Color3, Vector3, UniversalCamera, DynamicTexture, StandardMaterial, MeshBuilder, PointerEventTypes, WebXRState
@@ -13,6 +15,7 @@ const context = {
 }
 
 const init = async () => {
+    zzfx(1, 0.05, 239, 0.04, 0.09, 0.29, 0, 0.99, -0.9, 0, 0, 0, 0, 0, 0, 0.1, 0.05, 0.91, 0.08, 0) // Jump 31
     document.getElementById('intro').style.display = 'none'
     const canvas = document.getElementById('renderCanvas')
     canvas.style.display = 'block'

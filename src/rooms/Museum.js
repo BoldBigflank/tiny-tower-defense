@@ -7,8 +7,7 @@ import {
 import * as Canon from '../content/canon.js'
 import * as SculpturesStation from './Sculptures'
 import * as WavesStation from './Waves'
-import '../utils/zzfx'
-import '../utils/zzfxm.min'
+import * as TrampStation from './Tramp'
 
 const {
     Color3, CSG, Vector3, HemisphericLight, PointLight, StandardMaterial, Mesh, MeshBuilder, TransformNode, WebXRState
@@ -103,6 +102,10 @@ export async function setup(ctx) {
     linksSculpture.rotate(Vector3.Up(), Math.PI / 2)
 
     WavesStation.setup(ctx)
+
+    const trampGame = await TrampStation.setup(ctx)
+    trampGame.position.y = 6.2
+    
 
     // Story board
     const storyTextMesh = textPanelMesh({ width: 1024, height: 500 }, scene)
