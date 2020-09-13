@@ -110,11 +110,9 @@ export async function setup(ctx) {
     storyTextMesh.scaling = new Vector3(5, 5, 1)
     storyTextMesh.setText('Welcome speed sculptors!|Complete each sculpture in|4:04 without any mistakes|to earn a high score')
 
-    if (this.playing) return
-    let mySongData = zzfxM(...Canon.song)
-    let myAudioNode = zzfxP(...mySongData)
+    const mySongData = zzfxM(...Canon.song)
+    const myAudioNode = zzfxP(...mySongData)
     myAudioNode.loop = true
-    this.playing = true
 }
 
 export function enter(ctx) {

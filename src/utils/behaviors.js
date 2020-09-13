@@ -77,10 +77,10 @@ export function addErasable(model) {
             const { correctState } = this.props
             if (correctState === 1) { // You chose poorly
                 this.materialIndex = 1
-                zzfx(...[, , 1171, .01, , .08, 3, .74, , 1.9, -389, .06, , .1, , .1, , , .03, .59]); // Blip 24
+                zzfx(1, .05, 1171, .01, 0, .08, 3, .74, 0, 1.9, -389, .06, 0, .1, 0, .1, 0, 1, .03, .59); // Blip 24
             } else { // You chose correctly
                 this.scaling = BABYLON.Vector3.Zero()
-                zzfx(...[, , 1851, .01, , .07, , 1.06, 2.4, , , , , , , , .01, .09, .03]); // Blip 22
+                zzfx(1, .05, 1851, .01, 0, .07, 0, 1.06, 2.4, 0, 0, 0, 0, 0, 0, 0, .01, .09, .03, 0); // Blip 22
             }
         },
         moveInteraction(pointerInfo, context) {

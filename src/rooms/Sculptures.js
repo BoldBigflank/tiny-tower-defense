@@ -217,7 +217,7 @@ export async function setup(blockObject, ctx) {
             infoPanel.setText(text)
             counter = constants.percentUpdateFrames
             if (percent === 100) {
-                zzfx(...[, , 597, .34, .22, .42, , .71, -5.2, , 9, .08, .2, , , , , .59, .09, .14]); // Powerup 42
+                zzfx(1, .05, 597, .34, .22, .42, 0, .71, -5.2, 0, 9, .08, .2, 0, 0, 0, 0, .59, .09, .14); // Powerup 42
                 parentMesh.endGame()
             }
         }
@@ -236,7 +236,7 @@ export async function setup(blockObject, ctx) {
     startButton.startInteraction = () => {
         parentMesh.startGame()
         startButton.scaling = new Vector3(0.9, 0.9, 1)
-        zzfx(...[, , 239, .04, .09, .29, , .99, -0.9, , , , , , , .1, .05, .91, .08]); // Jump 31
+        zzfx(1, .05, 239, .04, .09, .29, 0, .99, -0.9, 0, 0, 0, 0, 0, 0, .1, .05, .91, .08, 0); // Jump 31
     }
     startButton.endInteraction = () => {
         startButton.scaling = Vector3.One()
