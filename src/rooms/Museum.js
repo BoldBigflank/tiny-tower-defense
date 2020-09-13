@@ -24,7 +24,7 @@ export async function setup(ctx) {
     const light1 = new HemisphericLight('light1', new Vector3(1, 1, 0), scene)
     // light1.diffuse = new Color3(1, 1, 0.85)
     light1.groundColor = new Color3(0, 0, 0)
-    const light2 = new PointLight('light2', new Vector3(0, 25, -1), scene)
+    const light2 = new BABYLON.DirectionalLight("DirectionalLight", new BABYLON.Vector3(0.3, -1, 0.3), scene);
     light2.intensity = 0.3
 
     // TODO: Split the building and the floor for teleportation reasons

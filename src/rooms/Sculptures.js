@@ -55,8 +55,8 @@ export async function setup(blockObject, ctx) {
         }
         sps.setParticles()
         sps.computeSubMeshes()
-        this.metadata.inProgress = true
         this.metadata.timer = constants.maxTime
+        this.metadata.inProgress = true
         solution.parent.scaling = Vector3.One()
 
         // Attach the solution mesh to any motion controller
@@ -75,8 +75,6 @@ export async function setup(blockObject, ctx) {
                 solutionBox.setParent(controller.motionController.rootMesh)
                 solutionBox.position = new Vector3(0, 0.05, -0.05)
                 solutionBox.rotation = new Vector3(Math.PI / 4, Math.PI, 0)
-
-
             }
         })
 
@@ -222,14 +220,11 @@ export async function setup(blockObject, ctx) {
         const dt = engine.getDeltaTime() / 1000
         timer = Math.max(0, timer - dt)
         counter -= 1
-        
-        const timerMesh = scene.getMeshByName('Timer-Mesh')
-        if (inProgress && timerMesh) timerMesh.setText(humanReadableTimer(timer))
-        
-        if (inProgress && timer === 0) { // Time's up
-            parentMesh.endGame()
-        }
+        if (timer === 0) counter = 0
+
         if (counter <= 0) { // Only update 1/s
+            const timerMesh = scene.getMeshByName('Timer-Mesh')
+            if (inProgress && timerMesh) timerMesh.setText(humanReadableTimer(timer))
             let text = (timer > 0) ? `${humanReadableTimer(timer)}` : `${blockObject.name}`
             const solutionParticles = solutionMesh.metadata.sps
             const sculptureParticles = mesh.metadata.sps
@@ -261,6 +256,10 @@ export async function setup(blockObject, ctx) {
             parentMesh.metadata.mistakes = mistakes
             parentMesh.metadata.timer = timer
         }
+        if (inProgress && timer === 0) { // Time's up
+            parentMesh.endGame()
+        }
+
         parentMesh.metadata.timer = timer
         parentMesh.metadata.counter = counter
     })
