@@ -33,14 +33,16 @@ export async function setup(blockObject, ctx) {
     } else {
         colorMaterial = colorNME()
     }
-    const { scene, engine, xrHelper, xrDefault, myStorage } = ctx
+    const {
+        scene, engine, xrHelper, xrDefault, myStorage
+    } = ctx
     // * The parent mesh
     const parentMesh = new Mesh(blockObject.name, scene)
     parentMesh.metadata = {
         inProgress: false,
         timer: 0,
         counter: 0,
-        myStorage: myStorage
+        myStorage
     }
     parentMesh.startGame = function() {
         const { sculpture, solution, myStorage } = this.metadata
@@ -77,10 +79,10 @@ export async function setup(blockObject, ctx) {
         })
 
         // CAT ONLY STUFF BEWARE
-        if (this.name !== "Cat") return
+        if (this.name !== 'Cat') return
         this.getChildMeshes(true).forEach((child) => {
-            if (child.name === "Tutorial-Mesh") child.dispose()
-            if (child.name === "Tutorial-Lines") child.dispose()
+            if (child.name === 'Tutorial-Mesh') child.dispose()
+            if (child.name === 'Tutorial-Lines') child.dispose()
         })
         if (myStorage.isSupported && !myStorage.get('Cat')) {
             const tutorialMesh = textPanelMesh({ width: 960 }, scene)
@@ -106,7 +108,9 @@ export async function setup(blockObject, ctx) {
     }
     parentMesh.endGame = function() {
         this.metadata.inProgress = false
-        const { sculpture, solution, percent, mistakes, timer } = this.metadata
+        const {
+            sculpture, solution, percent, mistakes, timer
+        } = this.metadata
         const sps = sculpture.metadata.sps
         const particleExport = []
         for (let i = 0; i < sps.nbParticles; i++) {
@@ -241,7 +245,7 @@ export async function setup(blockObject, ctx) {
             infoPanel.setText(text)
             counter = constants.percentUpdateFrames
             if (percent === 100) {
-                zzfx(1, .05, 597, .34, .22, .42, 0, .71, -5.2, 0, 9, .08, .2, 0, 0, 0, 0, .59, .09, .14); // Powerup 42
+                zzfx(1, 0.05, 597, 0.34, 0.22, 0.42, 0, 0.71, -5.2, 0, 9, 0.08, 0.2, 0, 0, 0, 0, 0.59, 0.09, 0.14) // Powerup 42
                 parentMesh.endGame(percent, mistakes)
             }
             parentMesh.metadata.percent = percent
@@ -263,7 +267,7 @@ export async function setup(blockObject, ctx) {
     startButton.startInteraction = () => {
         parentMesh.startGame()
         startButton.scaling = new Vector3(0.9, 0.9, 1)
-        zzfx(1, .05, 239, .04, .09, .29, 0, .99, -0.9, 0, 0, 0, 0, 0, 0, .1, .05, .91, .08, 0); // Jump 31
+        zzfx(1, 0.05, 239, 0.04, 0.09, 0.29, 0, 0.99, -0.9, 0, 0, 0, 0, 0, 0, 0.1, 0.05, 0.91, 0.08, 0) // Jump 31
     }
     startButton.endInteraction = () => {
         startButton.scaling = Vector3.One()
@@ -283,8 +287,8 @@ export async function setup(blockObject, ctx) {
                 new Vector3(0, 0.25, -0.2)
             ],
             colors: [
-                new BABYLON.Color4(0,0,0,1),
-                new BABYLON.Color4(0,0,0,1)
+                new BABYLON.Color4(0, 0, 0, 1),
+                new BABYLON.Color4(0, 0, 0, 1)
             ],
             useVertexAlpha: false
         }, scene)
