@@ -121,7 +121,7 @@ export async function setup(blockObject, ctx) {
         if (myStorage.isSupported) {
             const sculptureString = ctx.myStorage.get(parentMesh.name)
             let betterScore = false
-            if (!sculptureString) {
+            if (!sculptureString || sculptureString.split('|').length < 4) {
                 betterScore = true
             } else {
                 const [particles, highPercent, lowMistakes, timerRemaining] = sculptureString.split('|')
