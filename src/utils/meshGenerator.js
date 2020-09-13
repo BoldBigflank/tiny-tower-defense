@@ -229,6 +229,10 @@ const textPanelMesh = (options, scene) => {
         context.fillStyle = 'transparent'
         // context.fillRect(0, 0, panelWidth, panelHeight)
         context.clearRect(0, 0, panelWidth, panelHeight)
+        if (text === '') {
+            texture.update()
+            return
+        }
 
         // Rounded background
         context.beginPath()

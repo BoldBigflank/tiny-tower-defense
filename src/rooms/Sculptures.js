@@ -75,6 +75,8 @@ export async function setup(blockObject, ctx) {
                 solutionBox.setParent(controller.motionController.rootMesh)
                 solutionBox.position = new Vector3(0, 0.05, -0.05)
                 solutionBox.rotation = new Vector3(Math.PI / 4, Math.PI, 0)
+
+
             }
         })
 
@@ -141,6 +143,8 @@ export async function setup(blockObject, ctx) {
             }
         }
         solution.parent.scaling = Vector3.Zero()
+        const timerMesh = scene.getMeshByName('Timer-Mesh')
+        if (timerMesh) timerMesh.setText('')
     }
     // * Base
     const baseMesh = MeshBuilder.CreateBox('Pedestal', { height: 1.3, width: 0.4, depth: 0.4 }, scene)
@@ -218,6 +222,10 @@ export async function setup(blockObject, ctx) {
         const dt = engine.getDeltaTime() / 1000
         timer = Math.max(0, timer - dt)
         counter -= 1
+        
+        const timerMesh = scene.getMeshByName('Timer-Mesh')
+        if (inProgress && timerMesh) timerMesh.setText(humanReadableTimer(timer))
+        
         if (inProgress && timer === 0) { // Time's up
             parentMesh.endGame()
         }

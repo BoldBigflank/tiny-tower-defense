@@ -101,9 +101,18 @@ const init = async () => {
                 tutMesh.setText('Press up on the joystick|to aim and teleport|to the pointer location')
                 tutMesh.rotate(Vector3.Right(), Math.PI / 4)
                 tutMesh.scaling = new Vector3(0.25, 0.25, 0.25)
-
                 tutMesh.setParent(model.rootMesh)
                 tutMesh.position.y = 0.08
+
+                const oldTimerMesh = scene.getMeshByName('Timer-Mesh')
+                if (oldTimerMesh) oldTimerMesh.dispose()
+                const timerMesh = textPanelMesh({ width: 300, height: 160 }, scene)
+                timerMesh.name = 'Timer-Mesh'
+                timerMesh.setText('')
+                timerMesh.rotate(Vector3.Right(), 2 / 3 * Math.PI )
+                timerMesh.scaling = new Vector3(0.1, 0.1, 0.1)
+                timerMesh.setParent(model.rootMesh)
+                timerMesh.position = new Vector3(0, 0.04, 0.08)
             })
         })
     })
