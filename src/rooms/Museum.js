@@ -110,6 +110,30 @@ export async function setup(ctx) {
     storyTextMesh.scaling = new Vector3(5, 5, 1)
     storyTextMesh.setText('Welcome speed sculptors!|Complete each sculpture in|4:04 without any mistakes|to earn a high score')
 
+    // Billboard
+    const scoreboardTextMesh = textPanelMesh({width: 1920, height: 1080}, scene)
+
+    scoreboardTextMesh.position = new Vector3(-7.34, 3, 2)
+    scoreboardTextMesh.scaling = new Vector3(8, 8, 1)
+    scoreboardTextMesh.rotation = new Vector3(0, 3 / 2 * Math.PI, 0)
+    scene.registerBeforeRender(() => {
+        let text = 'Scoreboard|'
+        text += 'Name^Percent^Mistakes^Timer'
+        ctx.sculptures = ctx.sculptures || []
+        if (ctx.myStorage.isSupported) {
+            ctx.sculptures.forEach((name) => {
+                const sculptureString = ctx.myStorage.get(name)
+                if (!sculptureString) return
+                const [particles, highPercent, lowMistakes, timerRemaining] = sculptureString.split('|')
+                if (particles) {
+                    text += `|${name}^${highPercent}^${lowMistakes}^${timerRemaining}`
+                }
+            })
+        }
+        scoreboardTextMesh.setText(text)
+    })
+
+    // Music
     const mySongData = zzfxM(...Canon.song)
     const myAudioNode = zzfxP(...mySongData)
     myAudioNode.loop = true

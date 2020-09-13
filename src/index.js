@@ -1,12 +1,16 @@
 import './style.scss'
 import * as roomMuseum from './rooms/Museum.js'
 import { textPanelMesh } from './utils/meshGenerator'
+import { Storage } from './utils/Storage'
 
 const {
     Scene, Color3, Vector3, UniversalCamera, DynamicTexture, StandardMaterial, MeshBuilder, PointerEventTypes, WebXRState
 } = BABYLON
 
-const context = {}
+const context = {
+    sculptures: [],
+    myStorage: new Storage()
+}
 
 const init = async () => {
     document.getElementById('intro').style.display = 'none'

@@ -126,7 +126,7 @@ const blockMesh = (modelObject, solutionParticles, scene) => {
     const BOX_SIZE = 1 / WIDTH
     // Make a SPS
     // First create the SPS
-    const SPS = new SolidParticleSystem(`${modelObject.name}-SPS`, scene, { 
+    const SPS = new SolidParticleSystem(`${modelObject.name}-SPS`, scene, {
         isPickable: pickable,
         useModelMaterial: true
     })
@@ -138,7 +138,7 @@ const blockMesh = (modelObject, solutionParticles, scene) => {
     sculptureMesh.position.y = 1
 
     SPS.initParticles = function() {
-        for (let i = 0; i < SPS.nbParticles; i++) {3
+        for (let i = 0; i < SPS.nbParticles; i++) {
             const particle = SPS.particles[i]
             particle.props = { state: 1 }
             if (solutionParticles) {
@@ -194,7 +194,7 @@ const startButtonMesh = (scene) => {
     context.translate(0.5 * size, 0.5 * size)
     // first point
     context.beginPath()
-    let distance = 0.25 * size
+    const distance = 0.25 * size
     let angle = 0
     context.moveTo(distance * Math.cos(angle), distance * Math.sin(angle))
     angle = 2 / 3 * Math.PI
@@ -225,7 +225,6 @@ const textPanelMesh = (options, scene) => {
     }
     mesh.setText = function(text) {
         this.text = text
-        const texture = this.material.diffuseTexture
         const context = texture.getContext()
         context.fillStyle = 'transparent'
         // context.fillRect(0, 0, panelWidth, panelHeight)
@@ -245,9 +244,13 @@ const textPanelMesh = (options, scene) => {
         context.font = '64px Helvetica'
         context.fillStyle = 'white'
         const lines = text.split('|')
-        lines.forEach((line, i) => {
-            // TODO: Do hacks to color the % and timer lines using regex matching
-            context.fillText(line, 75, 100 + i * 96)
+        lines.forEach((line, row) => {
+            const phrases = line.split('^')
+            phrases.forEach((phrase, column) => {
+                context.fillStyle = '#ffffff'
+                if (column === 2 || phrase.includes('mistake')) context.fillStyle = '#ff3333'
+                context.fillText(phrase, 75 + ((panelWidth - 150) / phrases.length) * column, 100 + row * 96)
+            })
         })
         texture.update()
     }

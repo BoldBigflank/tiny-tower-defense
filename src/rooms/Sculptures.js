@@ -6,7 +6,6 @@ import {
 } from '../utils/meshGenerator'
 import { blankBlock } from '../content/models'
 import constants from '../utils/constants'
-import { Storage } from '../utils/Storage'
 
 const {
     Vector3, Mesh, MeshBuilder, StandardMaterial, Color3
@@ -23,6 +22,7 @@ const humanReadableTimer = (time) => {
 
 export async function setup(blockObject, ctx) {
     const redColorMaterial = createColorMaterial(new Color3(1.0, 0, 0))
+    ctx.sculptures.push(blockObject.name)
     let colorMaterial
     if (blockObject.colors) {
         const colors = blockObject.colors.map((color) => {
@@ -33,8 +33,7 @@ export async function setup(blockObject, ctx) {
     } else {
         colorMaterial = colorNME()
     }
-    const myStorage = new Storage()
-    const { scene, engine, xrHelper, xrDefault } = ctx
+    const { scene, engine, xrHelper, xrDefault, myStorage } = ctx
     // * The parent mesh
     const parentMesh = new Mesh(blockObject.name, scene)
     parentMesh.metadata = {
@@ -107,7 +106,7 @@ export async function setup(blockObject, ctx) {
     }
     parentMesh.endGame = function() {
         this.metadata.inProgress = false
-        const { sculpture, solution } = this.metadata
+        const { sculpture, solution, percent, mistakes, timer } = this.metadata
         const sps = sculpture.metadata.sps
         const particleExport = []
         for (let i = 0; i < sps.nbParticles; i++) {
@@ -115,7 +114,28 @@ export async function setup(blockObject, ctx) {
             particleExport.push(particle.props.state)
         }
 
-        if (myStorage.isSupported) myStorage.set(parentMesh.name, particleExport.join(''))
+        if (myStorage.isSupported) {
+            const sculptureString = ctx.myStorage.get(parentMesh.name)
+            let betterScore = false
+            if (!sculptureString) {
+                betterScore = true
+            } else {
+                const [particles, highPercent, lowMistakes, timerRemaining] = sculptureString.split('|')
+                if (percent > parseInt(highPercent, 10)) {
+                    betterScore = true
+                }
+                if (percent === 100 && mistakes < parseInt(lowMistakes, 10)) {
+                    betterScore = true
+                }
+                if (percent === 100 && mistakes === 0 && timer > timerRemaining) {
+                    betterScore = true
+                }
+            }
+
+            if (betterScore) {
+                myStorage.set(parentMesh.name, `${particleExport.join('')}|${percent}|${mistakes}|${Math.floor(timer)}`)
+            }
+        }
         solution.parent.scaling = Vector3.Zero()
     }
     // * Base
@@ -148,8 +168,12 @@ export async function setup(blockObject, ctx) {
     mesh.metadata.sps.setMultiMaterial([colorMaterial, redColorMaterial])
     // If there's one stored in localstorage, do that one
     if (myStorage.isSupported) {
-        const particleString = myStorage.get(parentMesh.name)
-        if (particleString) {
+        const sculptureString = myStorage.get(parentMesh.name)
+        if (sculptureString) {
+            const [particleString, percent, mistakes, timer] = sculptureString.split('|')
+            parentMesh.metadata.percent = percent
+            parentMesh.metadata.mistakes = mistakes
+            parentMesh.metadata.timer = timer
             // Hide the solution
             solutionMesh.parent.scaling = Vector3.Zero()
             const particleImport = particleString.split('')
@@ -218,8 +242,11 @@ export async function setup(blockObject, ctx) {
             counter = constants.percentUpdateFrames
             if (percent === 100) {
                 zzfx(1, .05, 597, .34, .22, .42, 0, .71, -5.2, 0, 9, .08, .2, 0, 0, 0, 0, .59, .09, .14); // Powerup 42
-                parentMesh.endGame()
+                parentMesh.endGame(percent, mistakes)
             }
+            parentMesh.metadata.percent = percent
+            parentMesh.metadata.mistakes = mistakes
+            parentMesh.metadata.timer = timer
         }
         parentMesh.metadata.timer = timer
         parentMesh.metadata.counter = counter
