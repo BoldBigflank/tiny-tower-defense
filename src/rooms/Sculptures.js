@@ -248,7 +248,7 @@ export async function setup(blockObject, ctx) {
             }
             infoPanel.setText(text)
             counter = constants.percentUpdateFrames
-            if (percent === 100) {
+            if (inProgress && percent === 100) {
                 zzfx(1, 0.05, 597, 0.34, 0.22, 0.42, 0, 0.71, -5.2, 0, 9, 0.08, 0.2, 0, 0, 0, 0, 0.59, 0.09, 0.14) // Powerup 42
                 parentMesh.endGame(percent, mistakes)
             }
