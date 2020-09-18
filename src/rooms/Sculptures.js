@@ -316,7 +316,7 @@ export async function setup(blockObject, ctx) {
         helperBox.dispose()
     } else if (blockObject.name === 'Links') {
         mesh.scaling = new Vector3(2.2, 2.2, 2.2)
-        mesh.position = new Vector3(0, 0.88, 3)
+        mesh.position = new Vector3(0, 1.1, 3)
         baseMesh.position.x = -2
         solutionBox.position.x = -2
         helperBox.dispose()
