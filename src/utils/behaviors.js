@@ -1,20 +1,17 @@
 export function addGrabbable(model) {
     Object.assign(model, {
-        startInteraction(pointerInfo, controllerMesh, context) {
+        startInteraction(pointerInfo, controllerMesh) {
             this.props = this.props || {}
-            this.props.pointers = this.props.pointers || 0
-            if (this.props.pointers === 0) {
-                this.setParent(controllerMesh)
+            if (this.props.grabbedPointerId === undefined) {
+                this.props.originalParent = this.parent
             }
-            this.props.pointers += 1
+            this.props.grabbedPointerId = pointerInfo.event.pointerId
+            this.setParent(controllerMesh)
         },
-        moveInteraction(pointerInfo, context) {
-            // console.log('moveInteraction')
-        },
-        endInteraction() {
-            this.props.pointers -= 1
-            if (this.props.pointers === 0) {
-                this.setParent(null)
+        endInteraction(pointerInfo) {
+            if (this.props.grabbedPointerId === pointerInfo.event.pointerId) {
+                this.setParent(this.props.originalParent)
+                delete this.props.grabbedPointerId
             }
         }
     })
